@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model booking {
+  id              String         @id @db.Char(36)
+  user_id         String         @db.Char(36)
+  room_id         String         @db.Char(36)
+  check_in        DateTime       @db.DateTime(0)
+  check_out       DateTime       @db.DateTime(0)
+  guest           Int            @default(1)
+  status          booking_status @default(PENDING)
+  price_per_night Decimal        @db.Decimal(10, 2)
+  total_amount    Decimal        @db.Decimal(10, 2)
+  created_at      DateTime       @default(now()) @db.Timestamp(0)
+  updated_at      DateTime       @default(now()) @db.Timestamp(0)
+  room            room           @relation(fields: [room_id], references: [id], onUpdate: NoAction, map: "fk_bookings_room")
+  user            user           @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_bookings_user")
+  notification    notification[]
+
+  @@index([room_id, check_in, check_out, status], map: "idx_bookings_room_dates")
+  @@index([status], map: "idx_bookings_status")
+  @@index([user_id, status], map: "idx_bookings_user_status")
+}
+
+model notification {
+  id         String            @id @db.Char(36)
+  user_id    String            @db.Char(36)
+  booking_id String?           @db.Char(36)
+  type       notification_type
+  message    String            @db.VarChar(500)
+  is_read    Boolean           @default(false)
+  created_at DateTime          @default(now()) @db.Timestamp(0)
+  booking    booking?          @relation(fields: [booking_id], references: [id], onUpdate: NoAction, map: "fk_notifications_booking")
+  user       user              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_notifications_user")
+
+  @@index([booking_id], map: "idx_notifications_booking")
+  @@index([user_id, is_read], map: "idx_notifications_user_read")
+}
+
+model refresh_token {
+  id         String    @id @db.Char(36)
+  user_id    String    @db.Char(36)
+  token_hash String    @unique(map: "token_hash") @db.VarChar(255)
+  expires_at DateTime  @db.DateTime(0)
+  revoked_at DateTime? @db.DateTime(0)
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  user       user      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_refresh_tokens_user")
+
+  @@index([user_id], map: "idx_refresh_tokens_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model room {
+  id              String       @id @db.Char(36)
+  name            String       @db.VarChar(255)
+  description     String?      @db.Text
+  capacity        Int
+  price_per_night Decimal      @db.Decimal(10, 2)
+  is_active       Boolean      @default(true)
+  created_at      DateTime     @default(now()) @db.Timestamp(0)
+  updated_at      DateTime     @default(now()) @db.Timestamp(0)
+  booking         booking[]
+  room_image      room_image[]
+}
+
+model room_image {
+  id          String   @id @db.Char(36)
+  room_id     String   @db.Char(36)
+  url         String   @db.VarChar(2048)
+  storage_key String?  @db.VarChar(512)
+  mime_type   String?  @db.VarChar(100)
+  file_size   Int?
+  is_primary  Boolean  @default(false)
+  craeted_at  DateTime @default(now()) @db.Timestamp(0)
+  room        room     @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_room_images_room")
+
+  @@index([room_id], map: "idx_room_images_room")
+}
+
+model user {
+  id            String          @id @db.Char(36)
+  name          String          @db.VarChar(255)
+  email         String          @unique(map: "email") @db.VarChar(255)
+  password_hash String          @db.VarChar(255)
+  role          user_role       @default(USER)
+  is_active     Boolean         @default(true)
+  created_at    DateTime        @default(now()) @db.Timestamp(0)
+  updated_at    DateTime        @default(now()) @db.Timestamp(0)
+  booking       booking[]
+  notification  notification[]
+  refresh_token refresh_token[]
+}
+
+enum notification_type {
+  BOOKING_CREATED
+  BOOKING_CANCELLED
+  BOOKING_APPROVED
+  BOOKING_PAID
+}
+
+enum user_role {
+  USER
+  ADMIN
+}
+
+enum booking_status {
+  PENDING
+  APPROVED
+  CANCELLED
+  PAID
+}
