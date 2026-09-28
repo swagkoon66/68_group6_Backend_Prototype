@@ -5,7 +5,7 @@ import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Controller('room')
 export class RoomController {
-  constructor(private readonly roomService: RoomService) {}
+  constructor(private readonly roomService: RoomService) { }
 
   @Post()
   create(@Body() createRoomDto: CreateRoomDto) {
@@ -19,16 +19,27 @@ export class RoomController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.roomService.findOne(+id);
+    return this.roomService.findARoom(id);
   }
 
+  /* 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
-    return this.roomService.update(+id, updateRoomDto);
+    return this.roomService.update(id, updateRoomDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.roomService.remove(+id);
+    return this.roomService.remove(id);
+  }
+  */
+
+  @Patch(':id/enable')
+  enable(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
+    return this.roomService.enable(id);
+  }
+  @Patch(':id/disnable')
+  disable(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
+    return this.roomService.disable(id);
   }
 }

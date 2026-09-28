@@ -26,15 +26,18 @@
   /* FOLLOWING AJ'Pa's setting below*/
   
  "compilerOptions": {
- "target": "es2019",
+ "target": "es2023",
  "module": "commonjs",
  "outDir": "./dist",
  "rootDir": "./src",
  "strict": true,
  "esModuleInterop": true,
  "skipLibCheck": true,
- "forceConsistentCasingInFileNames": true
- },
- "include": ["src/**/*"]
-
+ "forceConsistentCasingInFileNames": true,
+ //  ADDED 28/09/26 by Koon
+ "types": ["node"],
+ "emitDecoratorMetadata": true,
+ "experimentalDecorators": true,
+},
+ "include": ["src/**/*"],
 }
