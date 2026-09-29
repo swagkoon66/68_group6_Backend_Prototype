@@ -147,7 +147,7 @@ VALUES
 -- =========================================================
 
 INSERT INTO `room_image`
-(`id`, `room_id`, `url`, `storage_key`, `mime_type`, `file_size`, `is_primary`, `craeted_at`)
+(`id`, `room_id`, `url`, `storage_key`, `mime_type`, `file_size`, `is_primary`, `created_at`)
 VALUES
 ('a101c7e4-52d8-4f93-b261-7e5a913d8042',
  '101a7c92-45de-4f18-b263-8a5d91e70436',

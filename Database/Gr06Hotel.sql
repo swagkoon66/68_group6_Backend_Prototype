@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS room_image (
 	`mime_type` VARCHAR(100),
 	`file_size` INT,
 	`is_primary` BOOLEAN NOT NULL DEFAULT FALSE,
-	`craeted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT fk_room_images_room FOREIGN KEY (room_id) REFERENCES `room`(id) ON DELETE CASCADE,
 	INDEX idx_room_images_room (room_id)
 );
