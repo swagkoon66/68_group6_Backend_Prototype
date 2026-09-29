@@ -1,5 +1,7 @@
 import { booking_status, room } from "@prisma/client";
 import { room_image } from "@prisma/client";
+import { CreateRoomImageDto } from "../../room-image/dto/create-room-image.dto";
+import { CreateBookingDto } from "../../booking/dto/create-booking.dto";
 export class CreateRoomDto {
     id!: string;
     name!: string;
@@ -7,7 +9,7 @@ export class CreateRoomDto {
     capacity!: number;
     pricePerNight!: number;
     isActive?: boolean;
-    bookingStatus?: XXX // enum from database
-    roomImages?: XXX // room_image from "room_image" table in database
+    booking?: CreateBookingDto[] // booking from "booking" table in database
+    roomImage?: CreateRoomImageDto[] // room_image from "room_image" table in database
     /* IGNORED createdAt and updatedAt*/
 }

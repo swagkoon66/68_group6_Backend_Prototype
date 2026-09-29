@@ -22,15 +22,37 @@ export class RoomService {
           description: createRoomDto.description,
           capacity: createRoomDto.capacity,
           price_per_night: createRoomDto.pricePerNight,
-          is_active: createRoomDto.isActive ??  true,
-          booking_status: XXX,
-          room_images: XXX,
+          is_active: createRoomDto.isActive ?? true,
+          booking: createRoomDto.booking ? {
+            create: createRoomDto.booking.map((a) => ({
+              id: a.id,
+              user_id: a.userId,
+              room_id: a.roomId,
+              check_in: a.checkIn,
+              check_out: a.checkOut,
+              guest: a.guest,
+              status: a.status,
+              price_per_night: a.pricePerNight,
+              total_amount: a.totalAmount,
+              created_at: a.createdAt,
+              updated_at: a.updatedAt,
+            }))
+          } : undefined,
+          room_image: createRoomDto.roomImage ? {
+            create: createRoomDto.roomImage.map((b) => ({
+              id: b.id,
+              roomId: b.roomId,
+              url: b.url,
+              storage_key: b.storageKey,
+              mime_type: b.mimeType,
+              file_size: b.fileSize,
+              is_primary: b.isPrimary,
+            }))
+          } : undefined,
         }
       })
     } catch (e: any) {
-      if (typeof e?.message === 'string' && e.message.toLowerCase().includes('uniques')) {
-        this.logger.error("Invalid room data provided");
-      }
+      this.logger.error("Invalid room data provided");
     }
   }
 
