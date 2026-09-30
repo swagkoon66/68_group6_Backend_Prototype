@@ -4,6 +4,7 @@ https://docs.google.com/document/d/16RYNtnKYCxbbEPO0WxVuL0hYGF59YGrMtdp1uQ4Z1yM/
 
 
 <!-- LIST OF COMMANDS USED -->
+<!-- 
 nest new <dir-name>
 cd then npm run start
 
@@ -57,4 +58,5 @@ npm install -g autocannon
 BASH
 for i in {1..15}; do curl -I -H "Authorization: Bearer <YOUR_TOKEN>" http://localhost:3000/terms; done
 
-docker exec NAME redis-cli keys "*"
+docker exec NAME redis-cli keys "*" 
+-->
