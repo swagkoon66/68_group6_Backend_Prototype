@@ -4,6 +4,7 @@ import { UpdateRefreshTokenDto } from './dto/update-refresh-token.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from '@nestjs/common';
 
+/* Only basic function for now */
 @Injectable()
 export class RefreshTokenService {
   constructor(private readonly prisma: PrismaService) { };

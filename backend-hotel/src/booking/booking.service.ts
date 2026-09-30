@@ -4,6 +4,7 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from '@nestjs/common';
 
+/* Only basic function for now */
 @Injectable()
 export class BookingService {
   constructor(private readonly prisma: PrismaService) { };

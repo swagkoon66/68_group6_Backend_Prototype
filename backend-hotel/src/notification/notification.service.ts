@@ -4,6 +4,7 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from '@nestjs/common';
 
+/* Only basic function for now */
 @Injectable()
 export class NotificationService {
   constructor(private readonly prisma: PrismaService) { };
