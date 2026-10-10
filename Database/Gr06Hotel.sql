@@ -4,7 +4,7 @@ USE `Gr06Hotel`;
 
 -- 1. USERS
 CREATE TABLE IF NOT EXISTS `user` (
-	`id` CHAR(36) PRIMARY KEY,
+	`id` INT AUTO_INCREMENT PRIMARY KEY,
 	`name` VARCHAR(255) NOT NULL,
 	`email` VARCHAR(255) NOT NULL UNIQUE,	
 	`password_hash` VARCHAR(255) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 
 -- 2. ROOMS
 CREATE TABLE IF NOT EXISTS `room` (
-	`id` CHAR(36) PRIMARY KEY,
+	`id` INT AUTO_INCREMENT PRIMARY KEY,
 	`name` VARCHAR(255) NOT NULL,
 	`description` TEXT,
 	`capacity` INT NOT NULL ,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `room` (
 
 -- 3. room_images
 CREATE TABLE IF NOT EXISTS room_image (
-	`id` CHAR(36) PRIMARY KEY,
+	`id` INT AUTO_INCREMENT PRIMARY KEY,
 	`room_id` CHAR(36) NOT NULL,
 	`url` VARCHAR(2048) NOT NULL,
 	`storage_key` VARCHAR(512),
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS room_image (
 
 -- 4. bookings
 CREATE TABLE IF NOT EXISTS `booking` (
-	`id` CHAR(36) PRIMARY KEY,
+	`id` INT AUTO_INCREMENT PRIMARY KEY,
 	`user_id` CHAR(36) NOT NULL,
 	`room_id` CHAR(36) NOT NULL,
 	`check_in` DATETIME NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `booking` (
 
 -- 5. notification
 CREATE TABLE IF NOT EXISTS `notification` (
-	`id` CHAR(36) PRIMARY KEY,
+	`id` INT AUTO_INCREMENT PRIMARY KEY,
 	`user_id` CHAR(36) NOT NULL,
 	`booking_id` CHAR(36) NULL,
 	`type` ENUM('BOOKING_CREATED', 'BOOKING_CANCELLED', 'BOOKING_APPROVED', 'BOOKING_PAID') NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `notification` (
 
 -- 6. refresh_token (logout/revocation)
 CREATE TABLE IF NOT EXISTS `refresh_token` (
-	`id` CHAR(36) PRIMARY KEY,
+	`id` INT AUTO_INCREMENT PRIMARY KEY,
 	`user_id` CHAR(36) NOT NULL,
 	`token_hash` VARCHAR(255) NOT NULL UNIQUE,
 	`expires_at` DATETIME NOT NULL,
