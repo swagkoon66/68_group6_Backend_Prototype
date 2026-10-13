@@ -2,15 +2,16 @@ import { booking_status } from "@prisma/client";
 import { CreateNotificationDto } from "../../notification/dto/create-notification.dto";
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
 export class CreateBookingDto {
-    @IsString()
-    @IsNotEmpty()
-    id!: string;
-    @IsString()
-    @IsNotEmpty()
-    userId!: string;
-    @IsString()
-    @IsNotEmpty()
-    roomId!: string;
+    /* I will leave the old one here*/
+    // @IsString()
+    // @IsNotEmpty()
+    // id!: string;
+    @IsNumber()
+    @IsOptional()
+    userId?: string;
+    @IsNumber()
+    @IsOptional()
+    roomId?: string;
     @IsDate()
     @IsNotEmpty()
     checkIn!: Date;

@@ -1,15 +1,16 @@
 import { notification_type } from "@prisma/client";
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
 export class CreateNotificationDto {
-    @IsString()
+    /* I will leave the old one here*/
+    // @IsString()
+    // @IsNotEmpty()
+    // id!:string;
+    @IsNumber()
     @IsNotEmpty()
-    id!:string;
-    @IsString()
-    @IsNotEmpty()
-    userId!: string;
-    @IsString()
+    userId?: number;
+    @IsNumber()
     @IsOptional()
-    bookingId?: string;
+    bookingId?: number;
     @IsNotEmpty()
     type!: notification_type;
     @IsString()

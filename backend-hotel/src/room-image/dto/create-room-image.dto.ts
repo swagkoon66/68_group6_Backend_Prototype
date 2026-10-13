@@ -1,11 +1,12 @@
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
 export class CreateRoomImageDto {
-    @IsString()
+    /* I will leave the old one here*/
+    // @IsString()
+    // @IsNotEmpty()
+    // id!: string;
+    @IsNumber()
     @IsNotEmpty()
-    id!: string;
-    @IsString()
-    @IsNotEmpty()
-    roomId!: string;
+    roomId!: number;
     @IsString()
     @IsNotEmpty()
     url!: string;

@@ -2,9 +2,10 @@ import { CreateRoomImageDto } from "../../room-image/dto/create-room-image.dto";
 import { CreateBookingDto } from "../../booking/dto/create-booking.dto";
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
 export class CreateRoomDto {
-    @IsString()
-    @IsNotEmpty()
-    id!: string;
+    /* I will leave the old one here*/
+    // @IsString()
+    // @IsNotEmpty()
+    // id!: string;
     @IsString()
     @IsNotEmpty()
     name!: string;
