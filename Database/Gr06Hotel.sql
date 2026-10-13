@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `room` (
 -- 3. room_images
 CREATE TABLE IF NOT EXISTS room_image (
 	`id` INT AUTO_INCREMENT PRIMARY KEY,
-	`room_id` CHAR(36) NOT NULL,
+	`room_id` INT NULL,
 	`url` VARCHAR(2048) NOT NULL,
 	`storage_key` VARCHAR(512),
 	`mime_type` VARCHAR(100),
@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS room_image (
 -- 4. bookings
 CREATE TABLE IF NOT EXISTS `booking` (
 	`id` INT AUTO_INCREMENT PRIMARY KEY,
-	`user_id` CHAR(36) NOT NULL,
-	`room_id` CHAR(36) NOT NULL,
+	`user_id` INT NULL,
+	`room_id` INT NULL,
 	`check_in` DATETIME NOT NULL,
 	`check_out` DATETIME NOT NULL,
 	`guest` INT NOT NULL DEFAULT 1,
@@ -67,8 +67,8 @@ CREATE TABLE IF NOT EXISTS `booking` (
 -- 5. notification
 CREATE TABLE IF NOT EXISTS `notification` (
 	`id` INT AUTO_INCREMENT PRIMARY KEY,
-	`user_id` CHAR(36) NOT NULL,
-	`booking_id` CHAR(36) NULL,
+	`user_id` INT NULL,
+	`booking_id` INT NULL,
 	`type` ENUM('BOOKING_CREATED', 'BOOKING_CANCELLED', 'BOOKING_APPROVED', 'BOOKING_PAID') NOT NULL,
 	`message` VARCHAR(500) NOT NULL,
   	`is_read` BOOLEAN NOT NULL DEFAULT FALSE,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `notification` (
 -- 6. refresh_token (logout/revocation)
 CREATE TABLE IF NOT EXISTS `refresh_token` (
 	`id` INT AUTO_INCREMENT PRIMARY KEY,
-	`user_id` CHAR(36) NOT NULL,
+	`user_id` INT NULL,
 	`token_hash` VARCHAR(255) NOT NULL UNIQUE,
 	`expires_at` DATETIME NOT NULL,
 	`revoked_at` DATETIME NULL,
