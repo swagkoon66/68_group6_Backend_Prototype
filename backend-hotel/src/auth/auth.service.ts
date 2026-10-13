@@ -21,21 +21,18 @@ export class AuthService {
     }
     const saltRounds = Number(process.env.SALT_ROUND);
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-
     /* 
-    UNCLEAR WHAT SHOULD KOON DO 
     BELOW IS THE ALMOST A COPY FROM LAB
     */
     const user = await this.prisma.user.create({
       data: {
-        id: "67", //UNCLEAR
         name: name,
         email: email,
         password_hash: hashedPassword,
         role: user_role.USER,
         is_active: true,
-        created_at: new Date(Date.now()),
-        updated_at: new Date(Date.now()),
+        // created_at: new Date(Date.now()),
+        // updated_at: new Date(Date.now()),
       }
     })
     return {

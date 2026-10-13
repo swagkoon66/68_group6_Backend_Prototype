@@ -8,10 +8,10 @@ export class CreateBookingDto {
     // id!: string;
     @IsNumber()
     @IsOptional()
-    userId?: string;
+    userId?: number;
     @IsNumber()
     @IsOptional()
-    roomId?: string;
+    roomId?: number;
     @IsDate()
     @IsNotEmpty()
     checkIn!: Date;

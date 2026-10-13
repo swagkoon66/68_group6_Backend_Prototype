@@ -10,11 +10,11 @@ export class RoomImageService {
   private readonly logger = new Logger('RoomImageService');
 
   async create(createRoomImageDto: CreateRoomImageDto) {
-    this.logger.log(`Creating roomImage ${createRoomImageDto.url, createRoomImageDto.id, createRoomImageDto.roomId}`);
+    this.logger.log(`Creating roomImage ${createRoomImageDto.url, /*createRoomImageDto.id,*/ createRoomImageDto.roomId}`);
     try {
       return await this.prisma.room_image.create({
         data: {
-          id: createRoomImageDto.id,
+          // id: createRoomImageDto.id,
           room_id: createRoomImageDto.roomId,
           url: createRoomImageDto.url,
           storage_key: createRoomImageDto.storageKey,

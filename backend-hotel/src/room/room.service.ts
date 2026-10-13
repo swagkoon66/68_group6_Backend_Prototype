@@ -13,11 +13,11 @@ export class RoomService {
 
   /* create or add new room into the database */
   async create(createRoomDto: CreateRoomDto) {
-    this.logger.log(`Creating room ${createRoomDto.id, createRoomDto.name}`);
+    this.logger.log(`Creating room ${/*createRoomDto.id,*/ createRoomDto.name}`);
     try {
       return await this.prisma.room.create({
         data: {
-          id: createRoomDto.id,
+          // id: createRoomDto.id,
           name: createRoomDto.name,
           description: createRoomDto.description,
           capacity: createRoomDto.capacity,
@@ -25,7 +25,7 @@ export class RoomService {
           is_active: createRoomDto.isActive ?? true,
           booking: createRoomDto.booking ? {
             create: createRoomDto.booking.map((a) => ({
-              id: a.id,
+              // id: a.id,
               user_id: a.userId,
               room_id: a.roomId,
               check_in: a.checkIn,
@@ -40,7 +40,7 @@ export class RoomService {
           } : undefined,
           room_image: createRoomDto.roomImage ? {
             create: createRoomDto.roomImage.map((b) => ({
-              id: b.id,
+              // id: b.id,
               roomId: b.roomId,
               url: b.url,
               storage_key: b.storageKey,
@@ -63,7 +63,7 @@ export class RoomService {
   }
 
   /* fetch room with = id */
-  async findARoom(id: string) {
+  async findARoom(id: number) {
     this.logger.log(`Returning a #${id} room`);
     const room = await this.prisma.room.findUnique({ where: { id } })
 
@@ -87,7 +87,7 @@ export class RoomService {
   */
 
   /* enable or disable active room */
-  async enable(id: string) {
+  async enable(id: number) {
     this.logger.log(`enabling room id=${id}`);
 
     const room = await this.findARoom(id);
@@ -99,7 +99,7 @@ export class RoomService {
 
     return this.prisma.room.update({ where: { id }, data: { is_active: true } });
   }
-  async disable(id: string) {
+  async disable(id: number) {
     this.logger.log(`disabling room id=${id}`);
 
     const room = await this.findARoom(id);

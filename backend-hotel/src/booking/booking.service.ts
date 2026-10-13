@@ -14,7 +14,7 @@ export class BookingService {
     try {
       return await this.prisma.booking.create({
         data: {
-          id: createBookingDto.id,
+          // id: createBookingDto.id,
           user_id: createBookingDto.userId,
           room_id: createBookingDto.roomId,
           check_in: createBookingDto.checkIn,
@@ -27,7 +27,7 @@ export class BookingService {
           updated_at: createBookingDto.updatedAt,
           notification: createBookingDto.notification ? {
             create: {
-              id: createBookingDto.notification.id,
+              // id: createBookingDto.notification.id,
               user_id: createBookingDto.notification.userId,
               type: createBookingDto.notification.type,
               message: createBookingDto.notification.message,

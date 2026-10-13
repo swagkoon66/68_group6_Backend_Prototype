@@ -11,11 +11,11 @@ export class RefreshTokenService {
   private readonly logger = new Logger('RefreshTokenService');
 
   async create(createRefreshTokenDto: CreateRefreshTokenDto) {
-    this.logger.log(`Creating a token ${createRefreshTokenDto.id}`);
+    this.logger.log(`Creating a token for user: ${/*createRefreshTokenDto.id*/ createRefreshTokenDto.userId}`);
     try {
       return await this.prisma.refresh_token.create({
         data: {
-          id: createRefreshTokenDto.id,
+          // id: createRefreshTokenDto.id,
           user_id: createRefreshTokenDto.userId,
           token_hash: createRefreshTokenDto.tokenHash,
           expires_at: createRefreshTokenDto.expiresAt,

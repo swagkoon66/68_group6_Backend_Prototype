@@ -14,7 +14,7 @@ export class UserService {
     try {
       return await this.prisma.user.create({
         data: {
-          id: createUserDto.id,
+          // id: createUserDto.id,
           name: createUserDto.name,
           email: createUserDto.email,
           password_hash: createUserDto.passwordHash,
@@ -24,7 +24,7 @@ export class UserService {
           updated_at: createUserDto.updatedAt,
           booking: createUserDto.booking ? {
             create: createUserDto.booking.map((a) => ({
-              id: a.id,
+              // id: a.id,
               user_id: a.userId,
               room_id: a.roomId,
               check_in: a.checkIn,
@@ -39,8 +39,8 @@ export class UserService {
           } : undefined,
           notification: createUserDto.notification ? {
             create: createUserDto.notification.map((b) => ({
-              id: b.id,
-              user_id: b.id,
+              // id: b.id,
+              // user_id: b.id,
               booking_id: b.bookingId,
               type: b.type,
               message: b.message,
@@ -50,8 +50,8 @@ export class UserService {
           } : undefined,
           refresh_token: createUserDto.refreshToken ? {
             create: createUserDto.refreshToken?.map((c) => ({
-              id: c.id,
-              user_id: c.id,
+              // id: c.id,
+              // user_id: c.id,
               token_hash: c.tokenHash,
               expires_at: c.expiresAt,
               revoked_at: c.revokedAt,

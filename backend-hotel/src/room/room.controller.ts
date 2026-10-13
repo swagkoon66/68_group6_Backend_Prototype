@@ -26,7 +26,7 @@ export class RoomController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.roomService.findARoom(id);
   }
 
@@ -44,12 +44,12 @@ export class RoomController {
 
   @Patch(':id/enable')
   @Roles(user_role.ADMIN)
-  enable(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
+  enable(@Param('id') id: number, @Body() updateRoomDto: UpdateRoomDto) {
     return this.roomService.enable(id);
   }
   @Patch(':id/disnable')
   @Roles(user_role.ADMIN)
-  disable(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
+  disable(@Param('id') id: number, @Body() updateRoomDto: UpdateRoomDto) {
     return this.roomService.disable(id);
   }
 }
