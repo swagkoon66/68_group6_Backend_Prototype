@@ -6,5 +6,6 @@ import { PrismaService } from '../prisma/prisma.service';
 @Module({
   controllers: [RefreshTokenController],
   providers: [RefreshTokenService, /* need prismaService to connect */ PrismaService],
+  exports: [RefreshTokenService]
 })
-export class RefreshTokenModule {}
+export class RefreshTokenModule { }

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { UnauthorizedException } from '@nestjs/common';
@@ -7,10 +7,12 @@ import { RegisterAuthDto } from './dto/register-auth.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { user_role } from '@prisma/client';
+import { RefreshTokenService } from '../refresh-token/refresh-token.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwtService: JwtService, private userService: UserService) { }
+  constructor(private prisma: PrismaService, private jwtService: JwtService, private userService: UserService, private refreshTokenService: RefreshTokenService) { }
 
   async register(registerDto: RegisterAuthDto) {
     const { email, password, name } = registerDto;
@@ -60,32 +62,35 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
     }
-    const payload = { name: user.name, email: user.email, id: user.id, role: user.role };
-    const access_token = this.jwtService.sign(payload)
+
+    await this.refreshTokenService.DeleteIfTokensExpired(user.id);
+    var availableRefreshTokens = await this.refreshTokenService.findAllOfUserToken(user.id);
+    var access_token;
+    if (availableRefreshTokens.length != 0) {
+      access_token = (await this.refreshTokenService.findOne(availableRefreshTokens[0].id))?.token_hash;
+    } else {
+      const payload = { name: user.name, email: user.email, user_id: user.id, role: user.role };
+      access_token = this.jwtService.sign(payload);
+      this.refreshTokenService.create_login(payload.user_id, access_token);
+    }
     return access_token;
   }
 
-  /* Koon prototype not working yet */
-  // async refresh(currentDto: LoginAuthDto, token: string) {
-  //   const userID = await this.validateUser(currentDto.email, currentDto.password);
-  //   const user = await this.userService.findOne(userID);
-  //   if (!user) {
-  //     throw new UnauthorizedException(`User Id: ${userID} is not authorized to access`);
-  //   }
-  //   // ADDED
-  //   try {
-  //     let temp = await this.jwtService.verifyAsync(token);
-  //     return this.login(currentDto);
-  //   }
-  //   catch (e) {
-  //     let today_date = Date.now();
-  //     // throw new TokenExpiredError('Token has already expired', new Date(today_date));
-  //     console.log(`Token has already expired ${new Date(today_date)}`);
-  //   }
-  //   // ADDED
-  //   // issue new token for expired or something
-  //   const payload = { name: user.name, email: user.email, id: user.id, role: user.role };
-  //   const new_token = this.jwtService.signAsync(payload);
-  //   return new_token;
-  // }
+  async logout(tokenObj: { token: string }) {
+    // Koon interpeted that it is just remove the user's token
+    return await this.refreshTokenService.removeThatHashed(tokenObj.token);
+  }
+
+  async refresh(currentDto: LoginAuthDto, tokenObj : {token : string}) {
+    const currentUser: CreateUserDto = await this.validateUser(currentDto.email, currentDto.password);
+    if(currentUser == null){
+      return new UnauthorizedException("User not found");
+    }
+    const availableToken = await this.refreshTokenService.findAllOfUserToken((await this.userService.findOneByEmail(currentUser.email))!.id);
+    if (availableToken == null){
+      return new BadRequestException("Tokens expired");
+    }
+    return;
+
+  }
 }

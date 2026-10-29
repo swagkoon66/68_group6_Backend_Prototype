@@ -64,19 +64,37 @@ export class UserService {
     }
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    this.logger.log(`This action returns all user`);
+    return await this.prisma.user.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    this.logger.log(`This action returns a #${id} user`);
+    return await this.prisma.user.findUnique({ where: { id } });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findOneByEmail(email: string) {
+    this.logger.log(`This action returns a #${email} user`);
+    return await this.prisma.user.findUnique({ where: { email } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    this.logger.log(`This action updates a #${id} user`);
+    return await this.prisma.user.update({
+      where: { id }, data: {
+        name: updateUserDto.name,
+        email: updateUserDto.email,
+        role: updateUserDto.role,
+        is_active: updateUserDto.isActive,
+        password_hash: updateUserDto.passwordHash,
+        updated_at: new Date(Date.now()),
+      }
+    });
+  }
+
+  async remove(id: number) {
+    this.logger.log(`This action removes a #${id} user`);
+    return await this.prisma.user.delete({ where: { id } });
   }
 }

@@ -6,7 +6,6 @@ import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class RoomService {
-
   /* calls constructor to do prisma service thingy */
   constructor(private readonly prisma: PrismaService) { }
   private readonly logger = new Logger('RoomServive');
@@ -75,16 +74,24 @@ export class RoomService {
     return room;
   }
 
-  /* Lets ignore these one for another week -Koon */
-  /*
   async update(id: number, updateRoomDto: UpdateRoomDto) {
-    return `This action updates a #${id} room`;
+    this.logger.log(`This action updates a #${id} room`);
+    return await this.prisma.room.update({
+      where: { id },
+      data: {
+        name: updateRoomDto.name,
+        description: updateRoomDto.description,
+        capacity: updateRoomDto.capacity,
+        is_active: updateRoomDto.isActive,
+        updated_at: new Date(Date.now())
+      }
+    })
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} room`;
+    this.logger.log(`This action removes a #${id} room`);
+    return await this.prisma.room.delete({ where: { id } });
   }
-  */
 
   /* enable or disable active room */
   async enable(id: number) {

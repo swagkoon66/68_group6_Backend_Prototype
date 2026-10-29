@@ -54,3 +54,14 @@ BASH
 for i in {1..15}; do curl -I -H "Authorization: Bearer <YOUR_TOKEN>" http://localhost:3000/terms; done
 
 docker exec NAME redis-cli keys "*" 
+
+
+npm install --save @nestjs/swagger swagger-ui-express --legacy-peer-deps
+
+npm i -D @types/jest --legacy-peer-deps
+import { Test, TestingModule } from '@nestjs/testing';
+, "types": ["jest", "node"]
+npm run test -- src/terms/terms.service.spec.ts
+npm run test -- src/terms/terms.controller.integration.spec.ts
+npm run test:e2e -- test/terms.e2e-spec.ts
+npm install supertest --legacy-peer-deps  

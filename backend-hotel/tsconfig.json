@@ -34,8 +34,10 @@
  "esModuleInterop": true,
  "skipLibCheck": true,
  "forceConsistentCasingInFileNames": true,
+ // ADDED 29/10/26
+ "types": ["node", "jest"],
+ "lib": ["es2023"],
  //  ADDED 28/09/26 by Koon
- "types": ["node"],
  "emitDecoratorMetadata": true,
  "experimentalDecorators": true,
 },
