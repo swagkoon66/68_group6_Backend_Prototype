@@ -35,7 +35,7 @@
  "skipLibCheck": true,
  "forceConsistentCasingInFileNames": true,
  //  ADDED 28/09/26 by Koon
- "types": ["node"],
+ "types": ["node", "jest"],
  "emitDecoratorMetadata": true,
  "experimentalDecorators": true,
 },
