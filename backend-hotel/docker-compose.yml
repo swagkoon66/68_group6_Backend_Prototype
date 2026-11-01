@@ -16,7 +16,7 @@ services:
       MYSQLUSER: ${MYSQL_USER:?Set MYSQL_USER}
       MYSQLPASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}
       # NOTE: forgot to pass this into nestJs app lol.
-      DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}"
+      DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}?allowPublicKeyRetrieval=true"
     depends_on:
       db:
         condition: service_healthy
