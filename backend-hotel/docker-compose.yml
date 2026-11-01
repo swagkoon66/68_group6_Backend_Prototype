@@ -12,11 +12,13 @@ services:
       PORT: "3000"
       MYSQLHOST: db
       MYSQLPORT: "3306"
-      MYSQLDATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE}
-      MYSQLUSER: ${MYSQL_USER:?Set MYSQL_USER}
-      MYSQLPASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}
+      MYSQLDATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in dockercompose.env}
+      MYSQLUSER: ${MYSQL_USER:?Set MYSQL_USER in dockercompose.env} 
+      MYSQLPASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in dockercompose.env}
       # NOTE: forgot to pass this into nestJs app lol.
       DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}?allowPublicKeyRetrieval=true"
+      SALT_ROUND: ${APP_SALT_ROUND:?Set APP_SALT_ROUND in dockercompose.env}
+      JWT_SECRET: ${APP_JWT_SECRET:?Set APP_JWT_SECRET in dockercompose.env}
     depends_on:
       db:
         condition: service_healthy
