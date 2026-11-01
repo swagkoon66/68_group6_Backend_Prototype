@@ -24,23 +24,27 @@ export class NotificationService {
         }
       });
     } catch (e: any) {
-        this.logger.error("Invalid notification data provided");
+      this.logger.error("Invalid notification data provided");
     }
   }
 
-  findAll() {
-    return `This action returns all notification`;
+  async findAll() {
+    this.logger.log(`This action returns all notification`);
+    return await this.prisma.notification.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
+  async findOne(id: number) {
+    this.logger.log(`This action returns a #${id} notification`);
+    return await this.prisma.notification.findUnique({ where: { id } });
   }
 
-  update(id: number, updateNotificationDto: UpdateNotificationDto) {
-    return `This action updates a #${id} notification`;
+  async update(id: number, updateNotificationDto: UpdateNotificationDto) {
+    this.logger.log(`This action updates a #${id} notification`);
+    return await this.prisma.notification.update({ where: { id }, data: { ...updateNotificationDto } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
+  async remove(id: number) {
+    this.logger.log(`This action removes a #${id} notification`);
+    return await this.prisma.notification.delete({ where: { id } });
   }
 }

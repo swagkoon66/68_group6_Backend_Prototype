@@ -4,7 +4,6 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from '@nestjs/common';
 
-/* Only basic function for now */
 @Injectable()
 export class BookingService {
   constructor(private readonly prisma: PrismaService) { };
@@ -42,19 +41,35 @@ export class BookingService {
     }
   }
 
-  findAll() {
-    return `This action returns all booking`;
+  async findAll() {
+    this.logger.log(`This action returns all booking`);
+    return await this.prisma.booking.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} booking`;
+  async findOne(id: number) {
+    this.logger.log(`This action returns a #${id} booking`);
+    return await this.prisma.booking.findUnique({ where: { id } });
   }
 
-  update(id: number, updateBookingDto: UpdateBookingDto) {
-    return `This action updates a #${id} booking`;
+  async update(id: number, updateBookingDto: UpdateBookingDto) {
+    this.logger.log(`This action updates a #${id} booking`);
+    return await this.prisma.booking.update({
+      where: { id }, data: {
+        user_id: updateBookingDto.userId,
+        room_id: updateBookingDto.roomId,
+        check_in: updateBookingDto.checkIn,
+        check_out: updateBookingDto.checkOut,
+        guest: updateBookingDto.guest,
+        status: updateBookingDto.status,
+        price_per_night: updateBookingDto.pricePerNight,
+        total_amount: updateBookingDto.totalAmount,
+        updated_at: new Date(Date.now()),
+      }
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} booking`;
+  async remove(id: number) {
+    this.logger.log(`This action removes a #${id} booking`);
+    return await this.prisma.booking.delete({ where: { id } });
   }
 }

@@ -1,31 +1,42 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { HttpCode, HttpStatus } from '@nestjs/common';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { RegisterAuthDto } from './dto/register-auth.dto';
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('register')
-  async register(@Body() registerDto: RegisterAuthDto){
+  register(@Body() registerDto: RegisterAuthDto) {
     return this.authService.register(registerDto);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() loginDto: LoginAuthDto){
+  login(@Body() loginDto: LoginAuthDto) {
     return this.authService.login(loginDto);
   }
 
-  // @Post('refresh')
-  // async refresh(@Body() loginDto: LoginAuthDto, token: string){
-  //   return this.authService.refresh(loginDto, token);
-  // }
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  logout(@Body() tokenObj: { token: string }) {
+    return this.authService.logout(tokenObj);
+  }
 
-  // @Get('admin-info')
-  // @users_role('ADMIN')
-  // getAdminInfo() {
-  //   return this.authService.
-  // }
+  @Post('refresh')
+  refresh(@Body() loginDto: LoginAuthDto, @Body() tokenObj: { token: string }) {
+    try {
+      this.authService.refresh(loginDto, tokenObj);
+    }
+    catch (e) {
+      if (e instanceof UnauthorizedException) {
+        return this.register;
+      }
+      else if (e instanceof BadRequestException) {
+        return this.login;
+      }
+    }
+  }
+
 }

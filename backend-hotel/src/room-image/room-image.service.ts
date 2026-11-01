@@ -29,19 +29,23 @@ export class RoomImageService {
     }
   }
 
-  findAll() {
-    return `This action returns all roomImage`;
+  async findAll() {
+    this.logger.log(`This action returns all roomImage`);
+    return await this.prisma.room_image.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} roomImage`;
+  async findOne(id: number) {
+    this.logger.log(`This action returns a #${id} roomImage`);
+    return await this.prisma.room_image.findUnique({ where: { id } });
   }
 
-  update(id: number, updateRoomImageDto: UpdateRoomImageDto) {
-    return `This action updates a #${id} roomImage`;
+  async update(id: number, updateRoomImageDto: UpdateRoomImageDto) {
+    this.logger.log(`This action updates a #${id} roomImage`);
+    return await this.prisma.room_image.update({ where: { id }, data: { ...updateRoomImageDto } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} roomImage`;
+  async remove(id: number) {
+    this.logger.log(`This action removes a #${id} roomImage`);
+    return await this.prisma.room_image.delete({ where: { id } });
   }
 }
