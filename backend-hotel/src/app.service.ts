@@ -6,4 +6,12 @@ export class AppService {
     console.log('Start Running')
     return 'Hello World!';
   }
+
+  getHealth(): {status: string, message: string, timestamp: string} {
+    return {
+      "status": 'ok',
+      "message": 'NestJS is up and running!',
+      "timestamp": new Date().toISOString()
+    };
+  }
 }

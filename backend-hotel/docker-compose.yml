@@ -1,1 +1,73 @@
-# Should use compose instead of CLI after lab11
+# NOTE: Should use compose instead of CLI after lab11
+
+name: lab12-nestjs-${STUDENT_ID:?Set STUDENT_ID in dockercompose.env}-project
+
+services:
+  app:
+    build: .
+    image: lab12-nestjs:${STUDENT_ID:?Set STUDENT_ID in dockercompose.env}
+    ports:
+      - "127.0.0.1:${APP_PORT:-8084}:3000"
+    environment:
+      PORT: "3000"
+      MYSQLHOST: db
+      MYSQLPORT: "3306"
+      MYSQLDATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE}
+      MYSQLUSER: ${MYSQL_USER:?Set MYSQL_USER}
+      MYSQLPASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}
+      # NOTE: forgot to pass this into nestJs app lol.
+      DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 180s
+
+  # db:
+  #   image: postgres:18-bookworm
+  #   environment:
+  #     POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
+  #     POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    # volumes:
+    #   - pgdata:/var/lib/postgresql
+    #   - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    # healthcheck:
+    #   test: ["CMD-SHELL", 'pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+    #   interval: 5s
+    #   timeout: 3s
+    #   retries: 12
+    #   start_period: 10s
+
+# volumes:
+#   pgdata:
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in dockercompose.env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in dockercompose.env}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in dockercompose.env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in dockercompose.env}
+    # NOTE: no need because docker manages it already
+    # ports:
+    #   - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d:ro
+      # NOTE: no need to mount multiple-ly, just go into /db instead
+      # - ./db/Gr06Hotel.sql
+      # - ./db/Gr06Hotel_sampleData.sql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  mysql_data:

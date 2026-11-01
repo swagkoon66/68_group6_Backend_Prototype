@@ -20,8 +20,9 @@ FROM node:24-bookworm-slim AS runtime
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV PORT=3000
+# USE ENV INJECTED TO COMPOSE.YML INSTEAD!
+# ENV NODE_ENV=production
+# ENV PORT=3000
 
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
