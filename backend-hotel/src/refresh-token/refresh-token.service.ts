@@ -10,11 +10,10 @@ export class RefreshTokenService {
   private readonly logger = new Logger('RefreshTokenService');
 
   async create(createRefreshTokenDto: CreateRefreshTokenDto) {
-    this.logger.log(`Creating a token for user: ${/*createRefreshTokenDto.id*/ createRefreshTokenDto.userId}`);
+    this.logger.log(`Creating a token for user: ${createRefreshTokenDto.userId}`);
     try {
       return await this.prisma.refresh_token.create({
         data: {
-          // id: createRefreshTokenDto.id,
           user_id: createRefreshTokenDto.userId,
           token_hash: createRefreshTokenDto.tokenHash,
           expires_at: createRefreshTokenDto.expiresAt,
@@ -26,7 +25,7 @@ export class RefreshTokenService {
     }
   }
 
-  async create_login(userId: number, token: string) {
+  async createLogin(userId: number, token: string) {
     this.logger.log(`Creating a token for user: ${userId}`);
     try {
       return await this.prisma.refresh_token.create({
@@ -52,6 +51,11 @@ export class RefreshTokenService {
     return await this.prisma.refresh_token.findUnique({ where: { id } });
   }
 
+  async findOneFromToken(token: string) {
+    this.logger.log(`This action returns a refreshToken that has ${token}`);
+    return await this.prisma.refresh_token.findUnique({ where: { token_hash: token } });
+  }
+
   async findAllOfUserToken(userId: number) {
     this.logger.log(`This action returns all of user ${userId}'s refreshToken`);
     return await this.prisma.refresh_token.findMany({ where: { user_id: userId } })
@@ -73,6 +77,6 @@ export class RefreshTokenService {
   }
 
   async DeleteIfTokensExpired(user_id: number) {
-    return await this.prisma.refresh_token.deleteMany({ where: { user_id: user_id, expires_at: {/* Less than or equals to */lte: new Date() } } })
+    return await this.prisma.refresh_token.deleteMany({ where: { user_id: user_id, expires_at: { lte: new Date() } } })
   }
 }

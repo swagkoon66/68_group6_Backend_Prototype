@@ -7,6 +7,7 @@ import { RolesGuard } from '../auth/guards/role-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { user_role } from '@prisma/client';
 import { Public, Roles } from '../auth/roles/roles.decorator';
+import { SearchRoomParamDto } from './dto/search-room-param.dto';
 
 @UseGuards(RolesGuard)
 @Controller('room')
@@ -52,10 +53,16 @@ export class RoomController {
   enable(@Param('id') id: number, @Body() updateRoomDto: UpdateRoomDto) {
     return this.roomService.enable(id);
   }
-  @Patch(':id/disnable')
+  @Patch(':id/disable')
   @UseGuards(JwtAuthGuard)
   @Roles(user_role.ADMIN)
   disable(@Param('id') id: number, @Body() updateRoomDto: UpdateRoomDto) {
     return this.roomService.disable(id);
+  }
+
+  @Post('search')
+  @Public()
+  search(@Body() seachParamDto: SearchRoomParamDto){
+    return this.roomService.findAllRoomThat(seachParamDto);
   }
 }

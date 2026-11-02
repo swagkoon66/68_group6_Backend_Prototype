@@ -3,20 +3,20 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from '@nestjs/common';
+import { SearchRoomParamDto } from './dto/search-room-param.dto';
+import { RoomImage } from '../room-image/entities/room-image.entity';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RoomService {
-  /* calls constructor to do prisma service thingy */
   constructor(private readonly prisma: PrismaService) { }
   private readonly logger = new Logger('RoomServive');
 
-  /* create or add new room into the database */
   async create(createRoomDto: CreateRoomDto) {
-    this.logger.log(`Creating room ${/*createRoomDto.id,*/ createRoomDto.name}`);
+    this.logger.log(`Creating room ${createRoomDto.name}`);
     try {
       return await this.prisma.room.create({
         data: {
-          // id: createRoomDto.id,
           name: createRoomDto.name,
           description: createRoomDto.description,
           capacity: createRoomDto.capacity,
@@ -24,7 +24,6 @@ export class RoomService {
           is_active: createRoomDto.isActive ?? true,
           booking: createRoomDto.booking ? {
             create: createRoomDto.booking.map((a) => ({
-              // id: a.id,
               user_id: a.userId,
               room_id: a.roomId,
               check_in: a.checkIn,
@@ -39,7 +38,6 @@ export class RoomService {
           } : undefined,
           room_image: createRoomDto.roomImage ? {
             create: createRoomDto.roomImage.map((b) => ({
-              // id: b.id,
               roomId: b.roomId,
               url: b.url,
               storage_key: b.storageKey,
@@ -55,13 +53,11 @@ export class RoomService {
     }
   }
 
-  /* fetch all rooms */
   async findAll() {
     this.logger.log(`Returning all rooms`);
     return this.prisma.room.findMany();
   }
 
-  /* fetch room with = id */
   async findARoom(id: number) {
     this.logger.log(`Returning a #${id} room`);
     const room = await this.prisma.room.findUnique({ where: { id } })
@@ -69,6 +65,27 @@ export class RoomService {
     if (!room) {
       this.logger.warn(`Room ${id} not found`);
       throw new NotFoundException(`Room ${id} not found`);
+    }
+
+    return room;
+  }
+
+  async findAllRoomThat(searchParamDto: SearchRoomParamDto) {
+    this.logger.log(`Returning a all room that fits the given search criteria`);
+    const { name, capacity, pricePerNight, isActive, startDate, endDate } = searchParamDto;
+    const queryWhereString: Prisma.roomWhereInput = {
+      ...(name !== undefined && { name: { contains: name } }),
+      ...(capacity !== undefined && { capacity }),
+      ...(pricePerNight !== undefined && { pricePerNight }),
+      ...(isActive !== undefined && { isActive }),
+      ...(startDate),
+      ...(endDate)
+    };
+    const room = await this.prisma.room.findMany({ where: queryWhereString });
+
+    if (!room) {
+      this.logger.warn(`Room with those criteria are not available`);
+      throw new NotFoundException(`Room with those criteria are not available`);
     }
 
     return room;
@@ -85,7 +102,20 @@ export class RoomService {
         is_active: updateRoomDto.isActive,
         updated_at: new Date(Date.now())
       }
-    })
+    });
+  }
+
+  async updateImage(id: number, image: RoomImage) {
+    this.logger.log(`This action updates image of #${id} room`);
+    return await this.prisma.room.update({
+      where: { id },
+      data: {
+        room_image: {
+          ...image
+        },
+        updated_at: new Date(Date.now())
+      }
+    });
   }
 
   async remove(id: number) {
@@ -93,7 +123,6 @@ export class RoomService {
     return await this.prisma.room.delete({ where: { id } });
   }
 
-  /* enable or disable active room */
   async enable(id: number) {
     this.logger.log(`enabling room id=${id}`);
 

@@ -23,9 +23,7 @@ export class AuthService {
     }
     const saltRounds = Number(process.env.SALT_ROUND);
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    /* 
-    BELOW IS THE ALMOST A COPY FROM LAB
-    */
+
     const user = await this.prisma.user.create({
       data: {
         name: name,
@@ -33,8 +31,8 @@ export class AuthService {
         password_hash: hashedPassword,
         role: user_role.USER,
         is_active: true,
-        // created_at: new Date(Date.now()),
-        // updated_at: new Date(Date.now()),
+        created_at: new Date(Date.now()),
+        updated_at: new Date(Date.now()),
       }
     })
     return {
@@ -71,23 +69,22 @@ export class AuthService {
     } else {
       const payload = { name: user.name, email: user.email, user_id: user.id, role: user.role };
       access_token = this.jwtService.sign(payload);
-      this.refreshTokenService.create_login(payload.user_id, access_token);
+      this.refreshTokenService.createLogin(payload.user_id, access_token);
     }
     return access_token;
   }
 
   async logout(tokenObj: { token: string }) {
-    // Koon interpeted that it is just remove the user's token
     return await this.refreshTokenService.removeThatHashed(tokenObj.token);
   }
 
-  async refresh(currentDto: LoginAuthDto, tokenObj : {token : string}) {
+  async refresh(currentDto: LoginAuthDto, tokenObj: { token: string }) {
     const currentUser: CreateUserDto = await this.validateUser(currentDto.email, currentDto.password);
-    if(currentUser == null){
+    if (currentUser == null) {
       return new UnauthorizedException("User not found");
     }
     const availableToken = await this.refreshTokenService.findAllOfUserToken((await this.userService.findOneByEmail(currentUser.email))!.id);
-    if (availableToken == null){
+    if (availableToken == null) {
       return new BadRequestException("Tokens expired");
     }
     return;

@@ -7,23 +7,15 @@ import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-    /* Construct and connect this "service" to the database */
-    constructor(){
-        /* assign database url from .env */
+    constructor() {
         const dataBaseUrl = process.env.DATABASE_URL;
-        
-        if(!dataBaseUrl){
-            /* construct logger (I don't know why this works instead of assign to a local variable) */
+        if (!dataBaseUrl) {
             (new Logger('PrismaService')).warn('Problem occured with DATABASE_URL');
             throw new Error('Problem occured with DATABASE_URL');
         }
-
-        /* maria adapter thingy */
         const adapter = new PrismaMariaDb(dataBaseUrl);
-        super({adapter});
+        super({ adapter });
     }
-
-    /* The module init and destruct thingy*/
     async onModuleInit() {
         await this.$connect();
     }

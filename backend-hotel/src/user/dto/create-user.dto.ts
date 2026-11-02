@@ -4,10 +4,6 @@ import { CreateNotificationDto } from "../../notification/dto/create-notificatio
 import { CreateRefreshTokenDto } from "../../refresh-token/dto/create-refresh-token.dto";
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
 export class CreateUserDto {
-    /* I will leave the old one here*/
-    // @IsNumber()
-    // @IsNotEmpty()
-    // id!: number;
     @IsString()
     @IsNotEmpty()
     name!: string;

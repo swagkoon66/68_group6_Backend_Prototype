@@ -4,7 +4,6 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Logger } from '@nestjs/common';
 
-/* Only basic function for now */
 @Injectable()
 export class NotificationService {
   constructor(private readonly prisma: PrismaService) { };
@@ -14,7 +13,6 @@ export class NotificationService {
     try {
       return await this.prisma.notification.create({
         data: {
-          // id: createNotificationDto.id,
           user_id: createNotificationDto.userId,
           booking_id: createNotificationDto.bookingId,
           type: createNotificationDto.type,
