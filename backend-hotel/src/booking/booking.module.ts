@@ -8,7 +8,6 @@ import { NotificationService } from '../notification/notification.service';
 
 @Module({
   controllers: [BookingController],
-  providers: [BookingService, PrismaService],
-  imports: [RefreshTokenService, RoomService, NotificationService],
+  providers: [BookingService, PrismaService, RefreshTokenService, RoomService, NotificationService],
 })
 export class BookingModule {}

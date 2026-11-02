@@ -6,7 +6,6 @@ import { RoomService } from '../room/room.service';
 
 @Module({
   controllers: [RoomImageController],
-  providers: [RoomImageService, PrismaService],
-  imports: [RoomService]
+  providers: [RoomImageService, PrismaService, RoomService],
 })
 export class RoomImageModule {}
