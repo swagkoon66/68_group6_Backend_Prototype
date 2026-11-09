@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -8,6 +8,7 @@ import { UseGuards } from '@nestjs/common';
 import { user_role } from '@prisma/client';
 import { Public, Roles } from '../auth/roles/roles.decorator';
 import { SearchRoomParamDto } from './dto/search-room-param.dto';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 @UseGuards(RolesGuard)
 @Controller('room')
@@ -21,12 +22,16 @@ export class RoomController {
     return this.roomService.create(createRoomDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(30000)
   @Get()
   @Public()
   findAll() {
     return this.roomService.findAll();
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(30000)
   @Get(':id')
   @Public()
   findOne(@Param('id') id: number) {
