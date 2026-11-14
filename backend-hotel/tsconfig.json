@@ -40,6 +40,6 @@
  //  ADDED 28/09/26 by Koon
  "emitDecoratorMetadata": true,
  "experimentalDecorators": true,
-},
+  },
  "include": ["src/**/*"],
 }

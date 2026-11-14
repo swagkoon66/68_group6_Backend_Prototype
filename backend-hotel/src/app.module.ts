@@ -9,10 +9,41 @@ import { NotificationModule } from './notification/notification.module';
 import { RoomImageModule } from './room-image/room-image.module';
 import { RefreshTokenModule } from './refresh-token/refresh-token.module';
 import { UserModule } from './user/user.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { createKeyv } from '@keyv/redis';
+// WTF SUNNY
+import { ThrottlerGuard } from "@nestjs/throttler"
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
-  imports: [PrismaModule, AuthModule, RoomModule, BookingModule, NotificationModule, RefreshTokenModule, RoomImageModule, UserModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    RoomModule,
+    BookingModule,
+    NotificationModule,
+    RefreshTokenModule,
+    RoomImageModule,
+    UserModule,
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => {
+        const host = process.env.REDIS_HOST ?? '127.0.0.1';
+        const port = Number(process.env.REDIS_PORT ?? 6379);
+        const redisStore = createKeyv(`redis://${host}:${port}`);
+        redisStore.on('error', (err) => console.error('Redis error:', err));
+        return { stores: [redisStore] };
+      },
+    }),
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // NO NEED BECAUSE ERROR
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerGuard,
+    // },
+  ],
 })
-export class AppModule {}
+export class AppModule { }

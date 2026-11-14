@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -7,6 +7,7 @@ import { RolesGuard } from '../auth/guards/role-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { user_role } from '@prisma/client';
 import { Public, Roles } from '../auth/roles/roles.decorator';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { SearchRoomParamDto } from './dto/search-room-param.dto';
 
 @UseGuards(RolesGuard)
