@@ -7,8 +7,8 @@ import { RolesGuard } from '../auth/guards/role-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { user_role } from '@prisma/client';
 import { Public, Roles } from '../auth/roles/roles.decorator';
-import { SearchRoomParamDto } from './dto/search-room-param.dto';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { SearchRoomParamDto } from './dto/search-room-param.dto';
 
 @UseGuards(RolesGuard)
 @Controller('room')
@@ -23,7 +23,7 @@ export class RoomController {
   }
 
   @UseInterceptors(CacheInterceptor)
-  @CacheTTL(30000)
+  @CacheTTL(30000) //30 second
   @Get()
   @Public()
   findAll() {
@@ -31,11 +31,11 @@ export class RoomController {
   }
 
   @UseInterceptors(CacheInterceptor)
-  @CacheTTL(30000)
+  @CacheTTL(30000) //30s econd
   @Get(':id')
   @Public()
   findOne(@Param('id') id: number) {
-    return this.roomService.findARoom(id);
+    return this.roomService.findARoom(+id);
   }
 
   @Patch(':id')
