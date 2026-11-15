@@ -9,6 +9,7 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RoomService {
+  
   constructor(private readonly prisma: PrismaService) { }
   private readonly logger = new Logger('RoomServive');
 
@@ -70,26 +71,54 @@ export class RoomService {
     return room;
   }
 
-  async findAllRoomThat(searchParamDto: SearchRoomParamDto) {
-    this.logger.log(`Returning a all room that fits the given search criteria`);
-    const { name, capacity, pricePerNight, isActive, startDate, endDate } = searchParamDto;
-    const queryWhereString: Prisma.roomWhereInput = {
-      ...(name !== undefined && { name: { contains: name } }),
+ async findAllRoomThat(searchParamDto: SearchRoomParamDto) {
+  this.logger.log('Searching rooms using the given criteria');
+
+  const {
+    name,
+    capacity,
+    pricePerNight,
+    isActive,
+    startDate,
+    endDate,
+  } = searchParamDto;
+
+  const room = await this.prisma.room.findMany({
+    where: {
+      ...(name !== undefined && {
+        name: { contains: name },
+      }),
       ...(capacity !== undefined && { capacity }),
-      ...(pricePerNight !== undefined && { pricePerNight }),
-      ...(isActive !== undefined && { isActive }),
-      ...(startDate),
-      ...(endDate)
-    };
-    const room = await this.prisma.room.findMany({ where: queryWhereString });
+      ...(pricePerNight !== undefined && {
+        price_per_night: new Prisma.Decimal(pricePerNight),
+      }),
+      ...(isActive !== undefined && {
+        is_active: isActive,
+      }),
+      ...(startDate !== undefined &&
+        endDate !== undefined && {
+          booking: {
+            none: {
+              status: {
+                in: ['PENDING', 'APPROVED', 'PAID'],
+              },
+              check_in: { lt: endDate },
+              check_out: { gt: startDate },
+            },
+          },
+        }),
+      is_active: isActive ?? true,
+    },
+  });
 
-    if (!room) {
-      this.logger.warn(`Room with those criteria are not available`);
-      throw new NotFoundException(`Room with those criteria are not available`);
-    }
+  if (room === null) {
+  throw new NotFoundException(
+    'Room with those criteria are not available',
+  );
+}
 
-    return room;
-  }
+return room;
+}
 
   async update(id: number, updateRoomDto: UpdateRoomDto) {
     this.logger.log(`This action updates a #${id} room`);

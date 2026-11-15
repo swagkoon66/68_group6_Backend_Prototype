@@ -1,3 +1,4 @@
+import { RefreshAuthDto } from './dto/refresh-auth.dto';
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
@@ -69,7 +70,7 @@ export class AuthService {
     } else {
       const payload = { name: user.name, email: user.email, user_id: user.id, role: user.role };
       access_token = this.jwtService.sign(payload);
-      this.refreshTokenService.createLogin(payload.user_id, access_token);
+      await this.refreshTokenService.createLogin(payload.user_id, access_token);
     }
     return access_token;
   }
@@ -78,16 +79,53 @@ export class AuthService {
     return await this.refreshTokenService.removeThatHashed(tokenObj.token);
   }
 
-  async refresh(currentDto: LoginAuthDto, tokenObj: { token: string }) {
-    const currentUser: CreateUserDto = await this.validateUser(currentDto.email, currentDto.password);
-    if (currentUser == null) {
-      return new UnauthorizedException("User not found");
-    }
-    const availableToken = await this.refreshTokenService.findAllOfUserToken((await this.userService.findOneByEmail(currentUser.email))!.id);
-    if (availableToken == null) {
-      return new BadRequestException("Tokens expired");
-    }
-    return;
+  
+  async refresh(refreshDto: RefreshAuthDto) {
+      const { email, password, token } = refreshDto;
 
-  }
+      // 1. Validate user credentials
+      const currentUser = await this.validateUser(email, password);
+
+      if (!currentUser) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // 2. Find the exact refresh token
+      const storedToken =
+        await this.refreshTokenService.findOneFromToken(token);
+
+      if (!storedToken || storedToken.user_id !== currentUser.id) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      // 3. Check expiration
+      if (storedToken.expires_at <= new Date()) {
+        throw new UnauthorizedException('Refresh token has expired');
+      }
+
+      // 4. Check revocation
+      if (storedToken.revoked_at !== null) {
+        throw new UnauthorizedException('Refresh token has been revoked');
+      }
+
+      // 5. Generate a replacement JWT
+      const payload = {
+        name: currentUser.name,
+        email: currentUser.email,
+        user_id: currentUser.id,
+        role: currentUser.role,
+      };
+
+      const newToken = this.jwtService.sign(payload);
+
+    
+      await this.refreshTokenService.update(storedToken.id, {
+          tokenHash: newToken,
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      });
+
+      return newToken;
+    
+    }
+
 }

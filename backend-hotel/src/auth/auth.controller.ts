@@ -1,3 +1,4 @@
+import { RefreshAuthDto } from './dto/refresh-auth.dto';
 import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { HttpCode, HttpStatus } from '@nestjs/common';
@@ -24,19 +25,11 @@ export class AuthController {
     return this.authService.logout(tokenObj);
   }
 
+  
+  @HttpCode(HttpStatus.OK)
   @Post('refresh')
-  refresh(@Body() loginDto: LoginAuthDto, @Body() tokenObj: { token: string }) {
-    try {
-      this.authService.refresh(loginDto, tokenObj);
-    }
-    catch (e) {
-      if (e instanceof UnauthorizedException) {
-        return this.register;
-      }
-      else if (e instanceof BadRequestException) {
-        return this.login;
-      }
-    }
+  refresh(@Body() refreshDto: RefreshAuthDto) {
+    return this.authService.refresh(refreshDto);
   }
 
 }
