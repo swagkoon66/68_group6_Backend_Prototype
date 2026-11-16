@@ -1,12 +1,18 @@
-jest.mock('../auth/guards/jwt-auth.guard', () => ({
-  JwtAuthGuard: class MockJwtAuthGuard {},
-}));
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoomController } from './room.controller';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { NotFoundException } from '@nestjs/common';
+
+jest.mock('../auth/guards/jwt-auth.guard', () => ({
+  JwtAuthGuard: class MockJwtAuthGuard {},
+}));
+
+jest.mock('@nestjs/cache-manager', () => ({
+  CacheInterceptor: class {},
+  CacheTTL: () => () => {},
+  CacheModule: { register: () => ({ module: class {} }) },
+}));
 
 const mockRoomService = {
   create: jest.fn(),

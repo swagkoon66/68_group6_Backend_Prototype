@@ -1,18 +1,3 @@
-jest.mock('../auth/guards/jwt-auth.guard', () => ({
-  JwtAuthGuard: class JwtAuthGuard {},
-}));
-
-jest.mock('../auth/guards/role-auth.guard', () => ({
-  RolesGuard: class RolesGuard {},
-}));
-jest.mock('../auth/guards/jwt-auth.guard', () => ({
-  JwtAuthGuard: class JwtAuthGuard {},
-}));
-
-jest.mock('../auth/guards/role-auth.guard', () => ({
-  RolesGuard: class RolesGuard {},
-}));
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { RoomController } from './room.controller';
@@ -21,6 +6,21 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { SearchRoomParamDto } from './dto/search-room-param.dto';
+
+jest.mock('../auth/guards/jwt-auth.guard', () => ({
+  JwtAuthGuard: class JwtAuthGuard {},
+}));
+
+jest.mock('../auth/guards/role-auth.guard', () => ({
+  RolesGuard: class RolesGuard {},
+}));
+jest.mock('../auth/guards/jwt-auth.guard', () => ({
+  JwtAuthGuard: class JwtAuthGuard {},
+}));
+
+jest.mock('../auth/guards/role-auth.guard', () => ({
+  RolesGuard: class RolesGuard {},
+}));
 
 const mockPrismaService = {
   room: {
@@ -31,6 +31,12 @@ const mockPrismaService = {
     delete: jest.fn(),
   },
 };
+
+jest.mock('@nestjs/cache-manager', () => ({
+  CacheInterceptor: class {},
+  CacheTTL: () => () => {},
+  CacheModule: { register: () => ({ module: class {} }) },
+}));
 
 describe('RoomController Integration', () => {
   let controller: RoomController;

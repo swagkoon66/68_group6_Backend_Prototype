@@ -1,11 +1,11 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { RefreshTokenController } from './refresh-token.controller';
+import { RefreshTokenService } from './refresh-token.service';
 
 jest.mock('../auth/guards/jwt-auth.guard', () => ({
   JwtAuthGuard: class MockJwtAuthGuard {},
 }));
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { RefreshTokenController } from './refresh-token.controller';
-import { RefreshTokenService } from './refresh-token.service';
 
 describe('RefreshTokenController', () => {
   let controller: RefreshTokenController;

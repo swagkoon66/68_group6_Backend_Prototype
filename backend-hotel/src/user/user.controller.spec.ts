@@ -1,12 +1,10 @@
-
-jest.mock('../auth/guards/jwt-auth.guard', () => ({
-  JwtAuthGuard: class MockJwtAuthGuard {},
-}));
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
+jest.mock('../auth/guards/jwt-auth.guard', () => ({
+  JwtAuthGuard: class MockJwtAuthGuard {},
+}));
 
 describe('UserController', () => {
   let controller: UserController;

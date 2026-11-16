@@ -1,3 +1,8 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { BookingController } from './booking.controller';
+import { BookingService } from './booking.service';
+import { CreateBookingDto } from './dto/create-booking.dto';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 
 jest.mock('../auth/guards/jwt-auth.guard', () => ({
   JwtAuthGuard: class MockJwtAuthGuard {},
@@ -7,11 +12,6 @@ jest.mock('../auth/guards/role-auth.guard', () => ({
   RolesGuard: class MockRolesGuard {},
 }));
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { BookingController } from './booking.controller';
-import { BookingService } from './booking.service';
-import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
 
 describe('BookingController', () => {
   let controller: BookingController;
