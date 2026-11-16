@@ -1,5 +1,5 @@
 import { user_role } from "@prisma/client";
-import { CreateBookingDto } from "../../booking/dto/create-booking.dto";
+import { CreateNestedBookingDto } from "../../booking/dto/create-nested-booking.dto";
 import { CreateNotificationDto } from "../../notification/dto/create-notification.dto";
 import { CreateRefreshTokenDto } from "../../refresh-token/dto/create-refresh-token.dto";
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
@@ -24,7 +24,7 @@ export class CreateUserDto {
     @IsNotEmpty()
     updatedAt!: Date;
     @IsOptional()
-    booking?: CreateBookingDto[];
+    booking?: CreateNestedBookingDto[];
     @IsOptional()
     notification?: CreateNotificationDto[];
     @IsOptional()

@@ -33,12 +33,16 @@ export class RefreshTokenService {
           user_id: userId,
           token_hash: token,
           expires_at: new Date(Date.now() + 60 * 60 * 1000), // 60 minutes
-          revoked_at: new Date(Date.now()),
+          revoked_at: null,
         }
       });
     } catch (e: any) {
-      this.logger.error("Invalid refresh-token2 data provided");
-    }
+  this.logger.error(
+    'Failed to create refresh token',
+    e instanceof Error ? e.stack : String(e),
+  );
+  throw e;
+}
   }
 
   async findAll() {
@@ -61,10 +65,29 @@ export class RefreshTokenService {
     return await this.prisma.refresh_token.findMany({ where: { user_id: userId } })
   }
 
+  
   async update(id: number, updateRefreshTokenDto: UpdateRefreshTokenDto) {
     this.logger.log(`This action updates a #${id} refreshToken`);
-    return await this.prisma.refresh_token.update({ where: { id }, data: { ...updateRefreshTokenDto } });
+
+    return await this.prisma.refresh_token.update({
+      where: { id },
+      data: {
+        ...(updateRefreshTokenDto.userId !== undefined && {
+          user_id: updateRefreshTokenDto.userId,
+        }),
+        ...(updateRefreshTokenDto.tokenHash !== undefined && {
+          token_hash: updateRefreshTokenDto.tokenHash,
+        }),
+        ...(updateRefreshTokenDto.expiresAt !== undefined && {
+          expires_at: updateRefreshTokenDto.expiresAt,
+        }),
+        ...(updateRefreshTokenDto.revokedAt !== undefined && {
+          revoked_at: updateRefreshTokenDto.revokedAt,
+        }),
+      },
+    });
   }
+
 
   async remove(id: number) {
     this.logger.log(`This action removes a #${id} refreshToken`);

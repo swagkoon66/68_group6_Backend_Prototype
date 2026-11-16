@@ -1,3 +1,8 @@
+
+jest.mock('../auth/guards/jwt-auth.guard', () => ({
+  JwtAuthGuard: class MockJwtAuthGuard {},
+}));
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { RefreshTokenController } from './refresh-token.controller';
 import { RefreshTokenService } from './refresh-token.service';
@@ -5,14 +10,32 @@ import { RefreshTokenService } from './refresh-token.service';
 describe('RefreshTokenController', () => {
   let controller: RefreshTokenController;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [RefreshTokenController],
-      providers: [RefreshTokenService],
-    }).compile();
+  const mockPrismaService = {
+    refresh_token: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+  };
 
-    controller = module.get<RefreshTokenController>(RefreshTokenController);
-  });
+ beforeEach(async () => {
+  const module: TestingModule = await Test.createTestingModule({
+    controllers: [RefreshTokenController],
+    providers: [
+      {
+        provide: RefreshTokenService,
+        useValue: {},
+      },
+    ],
+  }).compile();
+
+  controller = module.get<RefreshTokenController>(
+    RefreshTokenController,
+  );
+});
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
