@@ -11,9 +11,6 @@ import { RefreshTokenModule } from './refresh-token/refresh-token.module';
 import { UserModule } from './user/user.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv } from '@keyv/redis';
-// WTF SUNNY
-import { ThrottlerGuard } from "@nestjs/throttler"
-import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -28,6 +25,9 @@ import { APP_GUARD } from '@nestjs/core';
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => {
+        if (process.env.NODE_ENV === 'test') {
+          return { ttl: 5000 }; // default in-memory store, no Redis
+        }
         const host = process.env.REDIS_HOST ?? '127.0.0.1';
         const port = Number(process.env.REDIS_PORT ?? 6379);
         const redisStore = createKeyv(`redis://${host}:${port}`);
