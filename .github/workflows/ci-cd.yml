@@ -45,6 +45,12 @@ jobs:
           cp docker.example.env docker.env
           docker compose --env-file docker.env -f compose.yml -f compose.local.yml up -d --build --wait
       # - name: Smoke on the water
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend-hotel/package-lock.json
+      - run: npm ci
       - name: Performing Service & Integration & e2e test
         run: |
             npm run test
