@@ -16,8 +16,8 @@ jobs:
       run: 
         working-directory: backend-hotel
     steps:
-      - uses: action/checkout@7
-      - uses: action/setup@7
+      - uses: actions/checkout@7
+      - uses: actions/setup-node@4
         with:
           node-version: 24
           cache: npm
