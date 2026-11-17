@@ -1,0 +1,55 @@
+name: ${PROJECT_NAME:?Set PROJECT_NAME in docker.env}-backend-project-group6
+
+services:
+  app:
+    build: .
+    image: ${PROJECT_NAME:?Set PROJECT_NAME in docker.env}-backend-project-group6
+    ports:
+      - "127.0.0.1:${APP_PORT:-8084}:3000"
+    environment:
+      PORT: "3000"
+      MYSQLHOST: db
+      MYSQLPORT: "3306"
+      MYSQLDATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in docker.env}
+      MYSQLUSER: ${MYSQL_USER:?Set MYSQL_USER in docker.env} 
+      MYSQLPASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in docker.env}
+      DATABASE_URL: "mysql://${MYSQLUSER}:${MYSQLPASSWORD}@{MYSQLHOST}:{MYSQLPORT}/${MYSQLDATABASE}?allowPublicKeyRetrieval=true"
+      SALT_ROUND: ${APP_SALT_ROUND:?Set APP_SALT_ROUND in docker.env}
+      JWT_SECRET: ${APP_JWT_SECRET:?Set APP_JWT_SECRET in docker.env}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 180s
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in docker.env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in docker.env}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in docker.env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in docker.env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 60s
+
+  redis:
+    image: redis:alpine
+    restart: always
+
+volumes:
+  mysql_data:

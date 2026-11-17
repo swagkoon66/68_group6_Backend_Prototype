@@ -1,0 +1,15 @@
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:2.16.0
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "127.0.0.1:81:81"
+    volumes:
+      - npm_data:/data
+      - npm_certs:/etc/letsencrypt
+# app and npm share this project's default network; proxy target is app:3000.
+volumes:
+  npm_data:
+  npm_certs:

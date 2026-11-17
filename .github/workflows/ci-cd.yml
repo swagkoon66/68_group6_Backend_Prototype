@@ -1,4 +1,4 @@
-name: CI-CD for backend group6
+name: CI-CD for backend project group6
 
 on:
   push:
@@ -23,14 +23,11 @@ jobs:
           cache: npm
       - name: Performing clean installation
         run: npm ci
-      - name: Performing Service & Integration & e2e test
+      - name: Checking composec config of container
         run: |
-          npm tun test
-          npm run test:e2e
-      - name: Composing up "locally"
-        run: |
-          cp .env.example .env
-          docker compose ??? --quiet
+          cp example.env .env
+          cp docker.example.env docker.env
+          docker compose --env-file docker.env -f compose.yml -f compose.local.yml config --quiet
 
   integration: 
     needs:
@@ -41,18 +38,19 @@ jobs:
       - uses: actions/checkout@7
       - name: Compose "production" version and start it
         run: |
-          cp dockercompose.example.env .dockercompose.env
-          docker compose ??? up -d --build --wait --quiet
-
-      - name: Smoke on the water
+          cp docker.env.example docker.env
+          docker compose --env-file docker.env -f compose.yml -f compose.local.yml up -d --build --wait
+      # - name: Smoke on the water
+      - name: Performing Service & Integration & e2e test
         run: |
-          ???
+            npm tun test
+            npm run test:e2e
       - name: Show if something failed
         if: failure()
-        run: docker compose ??? logs
+        run: docker compose --env-file docker.env -f compose.yml -f compose.local.yml logs app db redis
       - name: Stop and delete this "testing"
         if: always()
-        run: docker compose ??? down
+        run:  docker compose --env-file docker.env -f compose.yml -f compose.local.yml down -v
 
   publish:
     needs:
@@ -69,8 +67,10 @@ jobs:
         run: |
           IMAGE="${NICKNAME}/${GITHUB_REPOSITORY,,}"
           SHORT="${GITHUB_SHA::7}"
-          docker build --build-arg GIT_SHA="$GITHUB_SHA" -t "$IMAGE:$SHORT" -t "$IMAGE:main" .
-          docker push --all-tags "$IMAGE"
+          docker compose --env-file docker.env -f compose.yml -f compose.production.yml -f compose.publish.yml build
+          docker push "$IMAGE:$SHORT"
+          docker tag "$IMAGE:$SHORT" "$IMAGE:main"
+          docker push "$IMAGE:main"
           echo "Pushed $IMAGE:$SHORT" >> "$GITHUB_STEP_SUMMARY"
 
 

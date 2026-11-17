@@ -4,8 +4,6 @@ services:
   app:
     build: .
     image: ${PROJECT_NAME:?Set PROJECT_NAME in docker.env}-backend-project-group6
-    ports:
-      - "127.0.0.1:${APP_PORT:-8084}:3000"
     environment:
       PORT: "3000"
       MYSQLHOST: db
@@ -13,7 +11,7 @@ services:
       MYSQLDATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in docker.env}
       MYSQLUSER: ${MYSQL_USER:?Set MYSQL_USER in docker.env} 
       MYSQLPASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in docker.env}
-      DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}?allowPublicKeyRetrieval=true"
+      DATABASE_URL: "mysql://${MYSQLUSER}:${MYSQLPASSWORD}@{MYSQLHOST}:{MYSQLPORT}/${MYSQLDATABASE}?allowPublicKeyRetrieval=true"
       SALT_ROUND: ${APP_SALT_ROUND:?Set APP_SALT_ROUND in docker.env}
       JWT_SECRET: ${APP_JWT_SECRET:?Set APP_JWT_SECRET in docker.env}
       REDIS_HOST: redis
@@ -49,8 +47,6 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: redis-caching
-    restart: always
 
 volumes:
   mysql_data:
