@@ -35,6 +35,9 @@ jobs:
       - test
     runs-on:
       - ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-hotel
     steps:
       - uses: actions/checkout@v7
       - name: Compose "production" version and start it
@@ -58,6 +61,9 @@ jobs:
       - integration
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-lastest
+    defaults:
+      run:
+        working-directory: backend-hotel
     permissions:
       contents: read
       packages: write
