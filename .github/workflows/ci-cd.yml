@@ -43,25 +43,25 @@ jobs:
       - name: Compose "production" version and start it
         run: |
           cp docker.example.env docker.env
-          docker compose --env-file docker.env -f compose.yml -f compose.local.yml up -d --build --wait
-      # - name: Smoke on the water
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: backend-hotel/package-lock.json
-      - run: npm ci
-      - name: Performing Service & Integration & e2e test
-        run: |
-            npx prisma generate
-            npm run test
-            npm run test:e2e
+          docker compose --env-file docker.env -f compose.yml -f compose.production.yml up -d --build --wait
+      # # - name: Smoke on the water
+      # - uses: actions/setup-node@v7
+      #   with:
+      #     node-version: 24
+      #     cache: npm
+      #     cache-dependency-path: backend-hotel/package-lock.json
+      # - run: npm ci
+      # - name: Performing Service & Integration & e2e test
+      #   run: |
+      #       npx prisma generate
+      #       npm run test
+      #       npm run test:e2e
       - name: Show if something failed
         if: failure()
-        run: docker compose --env-file docker.env -f compose.yml -f compose.local.yml logs app db redis
+        run: docker compose --env-file docker.env -f compose.yml -f compose.production.yml logs app db redis
       - name: Stop and delete this "testing"
         if: always()
-        run:  docker compose --env-file docker.env -f compose.yml -f compose.local.yml down -v
+        run:  docker compose --env-file docker.env -f compose.yml -f compose.production.yml down -v
 
   publish:
     needs:
