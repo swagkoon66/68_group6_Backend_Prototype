@@ -47,7 +47,7 @@ jobs:
       # - name: Smoke on the water
       - name: Performing Service & Integration & e2e test
         run: |
-            npm tun test
+            npm run test
             npm run test:e2e
       - name: Show if something failed
         if: failure()
