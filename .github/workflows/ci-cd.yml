@@ -1,0 +1,76 @@
+name: CI-CD for backend group6
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+
+jobs:
+  test: 
+    runs-on:
+      - ubuntu-latest
+    defaults:
+      run: 
+        working-directory: backend-hotel
+    steps:
+      - uses: action/checkout@7
+      - uses: action/setup@7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Performing clean installation
+        run: npm ci
+      - name: Performing Service & Integration & e2e test
+        run: |
+          npm tun test
+          npm run test:e2e
+      - name: Composing up "locally"
+        run: |
+          cp .env.example .env
+          docker compose ??? --quiet
+
+  integration: 
+    needs:
+      - test
+    runs-on:
+      - ubuntu-latest
+    steps:
+      - uses: actions/checkout@7
+      - name: Compose "production" version and start it
+        run: |
+          cp dockercompose.example.env .dockercompose.env
+          docker compose ??? up -d --build --wait --quiet
+
+      - name: Smoke on the water
+        run: |
+          ???
+      - name: Show if something failed
+        if: failure()
+        run: docker compose ??? logs
+      - name: Stop and delete this "testing"
+        if: always()
+        run: docker compose ??? down
+
+  publish:
+    needs:
+      - integration
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-lastest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - run: NICKNAME="backend-project"
+      - name: Build and Push the project image into ${NICKNAME}/<owner>/<repo>:<short sha> :main
+        run: |
+          IMAGE="${NICKNAME}/${GITHUB_REPOSITORY,,}"
+          SHORT="${GITHUB_SHA::7}"
+          docker build --build-arg GIT_SHA="$GITHUB_SHA" -t "$IMAGE:$SHORT" -t "$IMAGE:main" .
+          docker push --all-tags "$IMAGE"
+          echo "Pushed $IMAGE:$SHORT" >> "$GITHUB_STEP_SUMMARY"
+
+
