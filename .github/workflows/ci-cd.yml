@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: backend-hotel/package-lock.json
       - name: Performing clean installation
         run: npm ci
       - name: Checking composec config of container
