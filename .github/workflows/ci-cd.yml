@@ -53,6 +53,7 @@ jobs:
       - run: npm ci
       - name: Performing Service & Integration & e2e test
         run: |
+            npx prisma generate
             npm run test
             npm run test:e2e
       - name: Show if something failed
