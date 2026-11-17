@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v7
       - name: Compose "production" version and start it
         run: |
-          cp docker.env.example docker.env
+          cp docker.example.env docker.env
           docker compose --env-file docker.env -f compose.yml -f compose.local.yml up -d --build --wait
       # - name: Smoke on the water
       - name: Performing Service & Integration & e2e test
