@@ -15,12 +15,19 @@ RUN npm run build
 # Runtime
 FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
+
+RUN apt-get update -y \
+ && apt-get install -y --no-install-recommends openssl \
+ && rm -rf /var/lib/apt/lists/*
+
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
-# Copy compiled application
+
 COPY --from=build --chown=node:node /app/dist ./dist
-# Copy generated Prisma runtime files
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=node:node prisma ./prisma
+COPY --chown=node:node prisma7.config.ts ./prisma7.config.ts
+
 USER node
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy --config prisma7.config.ts && node dist/main.js"]
