@@ -46,7 +46,7 @@ model notification {
 model refresh_token {
   id         Int       @id @default(autoincrement())
   user_id    Int?
-  token_hash String    @unique(map: "token_hash") @db.VarChar(255)
+  token_hash String    @unique(map: "token_hash") @db.VarChar(512)
   expires_at DateTime  @db.DateTime(0)
   revoked_at DateTime? @db.DateTime(0)
   created_at DateTime  @default(now()) @db.Timestamp(0)

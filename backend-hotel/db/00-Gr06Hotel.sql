@@ -90,4 +90,3 @@ CREATE TABLE IF NOT EXISTS `refresh_token` (
 	CONSTRAINT fk_refresh_tokens_user FOREIGN KEY (user_id) REFERENCES `user`(id) ON DELETE CASCADE,
   	INDEX idx_refresh_tokens_user (user_id)
 );
-
