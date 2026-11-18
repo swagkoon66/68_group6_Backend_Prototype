@@ -1,90 +1,160 @@
-name: CI-CD for backend project group6
+name: CI/CD
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
 permissions:
   contents: read
 
 jobs:
-  test: 
-    runs-on:
-      - ubuntu-latest
+  test:
+    name: Unit tests, build, and Compose validation
+    runs-on: ubuntu-latest
     defaults:
-      run: 
+      run:
         working-directory: backend-hotel
+
     steps:
       - uses: actions/checkout@v7
+
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: backend-hotel/package-lock.json
-      - name: Performing clean installation
+
+      - name: Install dependencies
         run: npm ci
-      - name: Checking composec config of container
-        run: |
-          cp example.env .env
-          cp docker.example.env docker.env
-          docker compose --env-file docker.env -f compose.yml -f compose.local.yml config --quiet
 
-  integration: 
-    needs:
-      - test
-    runs-on:
-      - ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend-hotel
-    steps:
-      - uses: actions/checkout@v7
-      - name: Compose "production" version and start it
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/Gr06Hotel
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Validate Compose configuration
         run: |
           cp docker.example.env docker.env
-          docker compose --env-file docker.env -f compose.yml -f compose.production.yml up -d --build --wait
-      # # - name: Smoke on the water
-      # - uses: actions/setup-node@v7
-      #   with:
-      #     node-version: 24
-      #     cache: npm
-      #     cache-dependency-path: backend-hotel/package-lock.json
-      # - run: npm ci
-      # - name: Performing Service & Integration & e2e test
-      #   run: |
-      #       npx prisma generate
-      #       npm run test
-      #       npm run test:e2e
-      - name: Show if something failed
-        if: failure()
-        run: docker compose --env-file docker.env -f compose.yml -f compose.production.yml logs app db redis
-      - name: Stop and delete this "testing"
-        if: always()
-        run:  docker compose --env-file docker.env -f compose.yml -f compose.production.yml down -v
+          sed -i 's/^MYSQL_DATABASE=.*/MYSQL_DATABASE=Gr06Hotel/' docker.env
+          docker compose --env-file docker.env \
+            -f compose.yml -f compose.local.yml config --quiet
 
-  publish:
-    needs:
-      - integration
-    if: github.ref == 'refs/heads/main'
+  integration:
+    name: E2E tests with MySQL
+    needs: test
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend-hotel
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend-hotel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/Gr06Hotel
+
+      - name: Configure test database
+        run: |
+          cp docker.example.env docker.env
+          sed -i 's/^MYSQL_DATABASE=.*/MYSQL_DATABASE=Gr06Hotel/' docker.env
+
+          # Expose MySQL to the runner so Jest can connect to it.
+          cat > compose.ci.yml <<'EOF'
+          services:
+            db:
+              ports:
+                - "127.0.0.1:3306:3306"
+          EOF
+
+      - name: Start MySQL
+        run: |
+          docker compose --env-file docker.env \
+            -f compose.yml -f compose.ci.yml up -d --wait db
+
+      - name: Run e2e tests
+        run: npm run test:e2e
+        env:
+          NODE_ENV: test
+          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/Gr06Hotel?allowPublicKeyRetrieval=true
+          JWT_SECRET: ci-test-secret
+          SALT_ROUND: "12"
+
+      - name: Show MySQL logs if something failed
+        if: failure()
+        run: |
+          docker compose --env-file docker.env \
+            -f compose.yml -f compose.ci.yml logs db
+
+      - name: Stop and remove test database
+        if: always()
+        run: |
+          docker compose --env-file docker.env \
+            -f compose.yml -f compose.ci.yml down -v
+
+  publish:
+    name: Publish image to GHCR
+    needs: integration
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    defaults:
+      run:
+        working-directory: backend-hotel
+
     steps:
       - uses: actions/checkout@v7
-      - run: NICKNAME="backend-project"
-      - name: Build and Push the project image into ${NICKNAME}/<owner>/<repo>:<short sha> :main
+
+      - name: Log in to GitHub Container Registry
         run: |
-          IMAGE="${NICKNAME}/${GITHUB_REPOSITORY,,}"
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+            docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push image
+        run: |
+          cp docker.example.env docker.env
+
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
           SHORT="${GITHUB_SHA::7}"
-          docker compose --env-file docker.env -f compose.yml -f compose.production.yml -f compose.publish.yml build
-          docker push "$IMAGE:$SHORT"
+          export IMAGE
+          export IMAGE_TAG="$SHORT"
+
+          # Override the Compose image name so it is published under GHCR.
+          cat > compose.ci-image.yml <<'EOF'
+          services:
+            app:
+              image: ${IMAGE}:${IMAGE_TAG}
+          EOF
+
+          docker compose --env-file docker.env \
+            -f compose.yml \
+            -f compose.production.yml \
+            -f compose.publish.yml \
+            -f compose.ci-image.yml \
+            build app
+
           docker tag "$IMAGE:$SHORT" "$IMAGE:main"
+          docker push "$IMAGE:$SHORT"
           docker push "$IMAGE:main"
-          echo "Pushed $IMAGE:$SHORT" >> "$GITHUB_STEP_SUMMARY"
 
-
+          echo "Published $IMAGE:$SHORT and $IMAGE:main" >> "$GITHUB_STEP_SUMMARY"
