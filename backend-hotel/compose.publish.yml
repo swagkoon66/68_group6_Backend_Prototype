@@ -1,5 +1,7 @@
 services:
   app:     
+    ports:
+      - "127.0.0.1:${APP_PORT:-8084}:3000"
     build:
       args:
         GIT_SHA: ${GITHUB_SHA}
