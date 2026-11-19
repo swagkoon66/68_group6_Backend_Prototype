@@ -36,7 +36,9 @@ import { createKeyv } from '@keyv/redis';
             ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT ?? 6379}`
             : 'redis://127.0.0.1:6379');
         const redisStore = createKeyv(redisUrl);
-        redisStore.on('error', (err) => console.error('Redis error:', err));
+        redisStore.on('error', (err: unknown) =>
+          console.error('Redis error:', err),
+        );
         return { stores: [redisStore] };
       },
     }),

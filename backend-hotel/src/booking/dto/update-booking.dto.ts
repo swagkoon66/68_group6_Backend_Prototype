@@ -1,6 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateNestedBookingDto } from "../../booking/dto/create-nested-booking.dto";
+
+import { PartialType, ApiPropertyOptional } from '@nestjs/swagger';
+import { CreateNestedBookingDto } from './create-nested-booking.dto';
 
 export class UpdateBookingDto extends PartialType(CreateNestedBookingDto) {
-    booking?: CreateNestedBookingDto[];
+  @ApiPropertyOptional({
+    type: [CreateNestedBookingDto],
+    description: 'Optional booking details array.',
+  })
+  booking?: CreateNestedBookingDto[];
 }
