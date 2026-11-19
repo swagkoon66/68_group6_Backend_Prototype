@@ -190,7 +190,7 @@ describe('RoomController Integration', () => {
       mockPrismaService.room.findUnique.mockResolvedValue(room);
       mockPrismaService.room.update.mockResolvedValue(result);
 
-      expect(await controller.enable(1, {} as UpdateRoomDto)).toEqual(result);
+      expect(await controller.enable(1)).toEqual(result);
 
       expect(mockPrismaService.room.update).toHaveBeenCalledWith({
         where: { id: 1 },
@@ -202,7 +202,7 @@ describe('RoomController Integration', () => {
       mockPrismaService.room.findUnique.mockResolvedValue(null);
 
       await expect(
-        controller.enable(999, {} as UpdateRoomDto),
+        controller.enable(999),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -216,7 +216,7 @@ describe('RoomController Integration', () => {
       mockPrismaService.room.findUnique.mockResolvedValue(room);
       mockPrismaService.room.update.mockResolvedValue(result);
 
-      expect(await controller.disable(1, {} as UpdateRoomDto)).toEqual(result);
+      expect(await controller.disable(1)).toEqual(result);
 
       expect(mockPrismaService.room.update).toHaveBeenCalledWith({
         where: { id: 1 },
@@ -228,7 +228,7 @@ describe('RoomController Integration', () => {
       mockPrismaService.room.findUnique.mockResolvedValue(null);
 
       await expect(
-        controller.disable(999, {} as UpdateRoomDto),
+        controller.disable(999),
       ).rejects.toThrow(NotFoundException);
     });
   });

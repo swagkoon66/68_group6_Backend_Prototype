@@ -11,17 +11,17 @@ describe('Hotel API (e2e)', () => {
   let prisma: PrismaService;
 
   // Normal authentication test account
-  const testEmail = `e2e-registration-${Date.now()}@example.com`;
+  const testEmail = `e2e-registration@example.com`;
   const testPassword = 'TestPassword123!';
   const testName = 'E2E Test User';
 
   // Admin test account
-  const adminTestEmail = `e2e-admin-${Date.now()}@example.com`;
+  const adminTestEmail = `e2e-admin@example.com`;
   const adminTestPassword = 'AdminPassword123!';
   const adminTestName = 'E2E Admin User';
 
   // Normal USER account
-  const roomUserEmail = `e2e-room-user-${Date.now()}@example.com`;
+  const roomUserEmail = `e2e-room-user@example.com`;
   const roomUserPassword = 'RoomUserPassword123!';
   const roomUserName = 'E2E Room User';
 
