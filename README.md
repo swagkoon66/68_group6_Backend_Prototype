@@ -1,7 +1,11 @@
 # 68_group6_Backend_Prototype
-A prototype project of Backend ITCS258 subject. Members: Bamm, Sunny, Koon
+A prototype project of Backend ITCS258 subject.
+Members: Bamm, Sunny, Koon
 https://docs.google.com/document/d/16RYNtnKYCxbbEPO0WxVuL0hYGF59YGrMtdp1uQ4Z1yM/edit?usp=sharing
 
+## Running locally using ```npm```
+## Running locally on ```Docker```
+## Running on ```Railway```
 ## Testing
 
 The project uses Jest for unit testing and Supertest for end-to-end (E2E) testing.
