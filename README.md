@@ -111,3 +111,24 @@ The following results were obtained during the testing process:
 - Test records are cleaned up after test execution to reduce interference between test runs.
 - The test database should not contain production data.
 
+### Swagger API Documentation Testing
+
+The project uses Swagger UI to document and manually test REST API endpoints.
+
+Start the backend:
+```bash
+npm run start:dev
+```
+Open Swagger UI:
+
+```bash
+http://localhost:3000/api-docs
+```
+
+### Verify the following:
+
+ - All API modules and endpoints are displayed.
+ - Request body schemas and response descriptions are available.
+ - Protected endpoints display JWT Bearer authentication.
+ - The Authorize feature accepts a valid access token.
+ - API endpoints can be tested through Swagger UI.
