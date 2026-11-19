@@ -30,7 +30,11 @@ import { createKeyv } from '@keyv/redis';
         }
         // const host = process.env.REDIS_HOST ?? '127.0.0.1';
         // KOON CHANGED FOR DEPLOYING ON RAILWAY (NEEDS PWD) AND LOCALLY
-        const redisUrl = process.env.REDIS_URL ?? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`;
+        const redisUrl =
+          process.env.REDIS_URL ||
+          (process.env.REDIS_HOST
+            ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT ?? 6379}`
+            : 'redis://127.0.0.1:6379');
         const redisStore = createKeyv(redisUrl);
         redisStore.on('error', (err) => console.error('Redis error:', err));
         return { stores: [redisStore] };
