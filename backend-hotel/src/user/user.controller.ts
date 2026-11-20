@@ -11,29 +11,32 @@ import { user_role } from '@prisma/client';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) { }
-
+  
+  @Roles(user_role.USER)
   @Roles(user_role.ADMIN)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
-
+  
   @Roles(user_role.ADMIN)
   @Get()
   findAll() {
     return this.userService.findAll();
   }
-   @Get('admin-info')
+  
+  @Roles(user_role.ADMIN)
+  @Get('admin-info')
   fetchAdminInfo() {
-    return this.userService.findOne(/*lets say that the first user is an admin*/ 1);
+    return this.userService.findOne(+"8");
   }
-
+  
   @Roles(user_role.ADMIN)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
   }
-
+  
   @Roles(user_role.ADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -45,5 +48,5 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
-
+  
 }

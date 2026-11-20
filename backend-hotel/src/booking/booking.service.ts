@@ -25,7 +25,6 @@ export class BookingService {
 
   private readonly logger = new Logger('BookingService');
 
-  // Check whether the requested dates are valid
   private validateDates(checkIn: Date, checkOut: Date): void {
     const start = new Date(checkIn);
     const end = new Date(checkOut);
@@ -41,7 +40,6 @@ export class BookingService {
     }
   }
 
-  // Check whether another active booking overlaps these dates
   private async hasDateConflict(
     roomId: number,
     checkIn: Date,
@@ -70,7 +68,6 @@ export class BookingService {
   }
   
 
-  // ADMIN: Create a booking
   async create(createBookingDto: CreateBookingDto) {
     const roomId = createBookingDto.roomId;
 
@@ -93,7 +90,6 @@ export class BookingService {
       throw new BadRequestException('Room is not available');
     }
 
-    // Validate guest count
     if (
       !Number.isInteger(createBookingDto.guest) ||
       createBookingDto.guest < 1
@@ -153,7 +149,6 @@ export class BookingService {
     });
   }
 
-  // USER: Create a booking
   async createForUser(
     jwtOfUser: { token: string },
     createBookingDto: CreateBookingDto,
@@ -190,7 +185,6 @@ export class BookingService {
     if (!room.is_active) {
       throw new BadRequestException('Room is not available');
     }
-    // Validate guest count
     if (!Number.isInteger(createBookingDto.guest) || createBookingDto.guest < 1) {
       throw new BadRequestException(
         'Guest count must be at least 1',
@@ -220,8 +214,6 @@ export class BookingService {
       );
     }
 
-    // Existing user-ID mapping is retained for now.
-    // We should verify the refresh-token return structure before correcting it.
     const userID = tokenExists ? tokenExists.user_id : undefined;
 
     const now = new Date();
@@ -253,13 +245,11 @@ export class BookingService {
     });
   }
 
-  // Get all bookings
   async findAll() {
     this.logger.log('Returning all bookings');
     return this.prisma.booking.findMany();
   }
 
-  // Get all bookings belonging to a user
   async findAllForUser(jwtOfUser: { token: string }) {
   if (!jwtOfUser?.token) {
     throw new UnauthorizedException('User token is missing');
@@ -278,14 +268,12 @@ export class BookingService {
   });
 }
 
-  // Get one booking
   async findOne(id: number) {
     return this.prisma.booking.findUnique({
       where: { id },
     });
   }
 
-  // Get one booking belonging to a user
   async findOneForUser(
   jwtOfUser: { token: string },
   bookingID: number,
@@ -310,7 +298,6 @@ export class BookingService {
   });
 }
 
-  // Update a booking
   async update(id: number, updateBookingDto: UpdateBookingDto) {
     const existingBooking = await this.prisma.booking.findUnique({
       where: { id },
@@ -335,7 +322,6 @@ export class BookingService {
     }
 
     this.validateDates(checkIn, checkOut);
-        // Validate guest count when provided
     const room = await this.roomService.findARoom(roomId);
     if (!room) {
         throw new NotFoundException('Room does not exist');
@@ -345,7 +331,6 @@ export class BookingService {
         throw new BadRequestException('Room is inactive');
     }
 
-    // Validate guest count
     const guest = updateBookingDto.guest ?? existingBooking.guest;
 
     if (!Number.isInteger(guest) || guest < 1) {
@@ -360,7 +345,6 @@ export class BookingService {
       );
     }
 
-    // Calculate booking price using the room's actual price
     const nights =
       (checkOut.getTime() - checkIn.getTime()) /
       (1000 * 60 * 60 * 24);
@@ -408,7 +392,6 @@ export class BookingService {
     return updateBooking;
   }
 
-  // Delete a booking
   async remove(id: number) {
     const removeBooking = await this.prisma.booking.delete({
       where: { id },
