@@ -83,14 +83,12 @@ export class AuthService {
   async refresh(refreshDto: RefreshAuthDto) {
       const { email, password, token } = refreshDto;
 
-      // 1. Validate user credentials
       const currentUser = await this.validateUser(email, password);
 
       if (!currentUser) {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      // 2. Find the exact refresh token
       const storedToken =
         await this.refreshTokenService.findOneFromToken(token);
 
@@ -98,17 +96,14 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      // 3. Check expiration
       if (storedToken.expires_at <= new Date()) {
         throw new UnauthorizedException('Refresh token has expired');
       }
 
-      // 4. Check revocation
       if (storedToken.revoked_at !== null) {
         throw new UnauthorizedException('Refresh token has been revoked');
       }
 
-      // 5. Generate a replacement JWT
       const payload = {
         name: currentUser.name,
         email: currentUser.email,

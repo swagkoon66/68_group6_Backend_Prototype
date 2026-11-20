@@ -58,8 +58,6 @@ describe('BookingService', () => {
     expect(service).toBeDefined();
   });
 
-  // CREATE BOOKING
-
   describe('create', () => {
     it('should create a booking successfully', async () => {
       const checkIn = new Date('2026-12-01');
@@ -496,7 +494,6 @@ describe('createForUser', () => {
 });
 
 
-  // RETRIEVE BOOKINGS
   describe('findAllForUser', () => {
   it('should return only bookings belonging to the authenticated user', async () => {
     const bookings = [
@@ -601,7 +598,6 @@ describe('createForUser', () => {
     });
   });
 
-  // UPDATE BOOKING
 
   describe('update', () => {
     it('should update a booking and create a notification', async () => {
@@ -814,7 +810,6 @@ describe('createForUser', () => {
 
   });
 
-  // DELETE BOOKING
 
   describe('remove', () => {
     it('should delete a booking and create a cancellation notification', async () => {

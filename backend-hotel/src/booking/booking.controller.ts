@@ -24,14 +24,12 @@ import { user_role } from '@prisma/client';
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
-  // ADMIN: Create a booking
   @Post('admin')
   @Roles(user_role.ADMIN)
   create(@Body() createBookingDto: CreateBookingDto) {
     return this.bookingService.create(createBookingDto);
   }
 
-  // USER: Create a booking
   @Post()
   @Roles(user_role.USER)
   createForUser(
@@ -46,14 +44,12 @@ export class BookingController {
     );
   }
 
-  // ADMIN: Get all bookings
   @Get()
   @Roles(user_role.ADMIN)
   findAll() {
     return this.bookingService.findAll();
   }
 
-  // USER: Get their own bookings
   @Get('my')
   @Roles(user_role.USER)
   findAllForUser(
@@ -64,14 +60,12 @@ export class BookingController {
     return this.bookingService.findAllForUser({ token });
   }
 
-  // ADMIN: Get one booking
   @Get(':id')
   @Roles(user_role.ADMIN)
   findOne(@Param('id') id: string) {
     return this.bookingService.findOne(+id);
   }
 
-  // ADMIN: Update a booking
   @Patch(':id')
   @Roles(user_role.ADMIN)
   update(
@@ -81,7 +75,6 @@ export class BookingController {
     return this.bookingService.update(+id, updateBookingDto);
   }
 
-  // ADMIN: Delete a booking
   @Delete(':id')
   @Roles(user_role.ADMIN)
   remove(@Param('id') id: string) {

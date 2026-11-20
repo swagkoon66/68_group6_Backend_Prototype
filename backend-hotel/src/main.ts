@@ -33,7 +33,7 @@ async function bootstrap() {
         description: 'Use: Authorization: Bearer <access_token>',
         in: 'header',
       },
-      'access-token', // Security name used in decorators
+      'access-token',
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);

@@ -54,7 +54,7 @@ export class RoomController {
   }
 
   @UseInterceptors(CacheInterceptor)
-  @CacheTTL(30000) //30 second
+  @CacheTTL(30000)
   @Get()
   @Public()
   @ApiOperation({ summary: 'Get all rooms' })
@@ -68,7 +68,7 @@ export class RoomController {
   }
 
   @UseInterceptors(CacheInterceptor)
-  @CacheTTL(30000) //30s econd
+  @CacheTTL(30000)
   @Get(':id')
   @Public()
   @ApiOperation({ summary: 'Get a room by ID' })

@@ -62,7 +62,6 @@ describe('RoomController Integration', () => {
     expect(controller).toBeDefined();
   });
 
-  // CREATE
   describe('create', () => {
     it('should create a room through the service', async () => {
       const dto: CreateRoomDto = {
@@ -97,7 +96,6 @@ describe('RoomController Integration', () => {
     });
   });
 
-  // FIND ALL
   describe('findAll', () => {
     it('should return all rooms', async () => {
       const rooms = [
@@ -112,7 +110,6 @@ describe('RoomController Integration', () => {
     });
   });
 
-  // FIND ONE
   describe('findOne', () => {
     it('should return a room by ID', async () => {
       const room = { id: 1, name: 'Room 1' };
@@ -135,7 +132,6 @@ describe('RoomController Integration', () => {
     });
   });
 
-  // UPDATE
   describe('update', () => {
     it('should update a room', async () => {
       const dto: UpdateRoomDto = {
@@ -161,7 +157,6 @@ describe('RoomController Integration', () => {
     });
   });
 
-  // REMOVE
   describe('remove', () => {
     it('should remove a room', async () => {
       const result = { id: 1, name: 'Room 1' };
@@ -187,7 +182,6 @@ describe('RoomController Integration', () => {
     });
   });
 
-  // ENABLE
   describe('enable', () => {
     it('should enable a room', async () => {
       const room = { id: 1, name: 'Room 1' };
@@ -213,7 +207,6 @@ describe('RoomController Integration', () => {
     });
   });
 
-  // DISABLE
   describe('disable', () => {
     it('should disable a room', async () => {
       const room = { id: 1, name: 'Room 1' };
@@ -239,7 +232,6 @@ describe('RoomController Integration', () => {
     });
   });
 
-  // SEARCH
   describe('search', () => {
     it('should return rooms matching the search criteria', async () => {
       const searchDto: SearchRoomParamDto = {

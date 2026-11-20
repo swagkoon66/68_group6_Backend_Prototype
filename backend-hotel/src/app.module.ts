@@ -26,10 +26,8 @@ import { createKeyv } from '@keyv/redis';
       isGlobal: true,
       useFactory: async () => {
         if (process.env.NODE_ENV === 'test') {
-          return { ttl: 5000 }; // default in-memory store, no Redis
+          return { ttl: 5000 };
         }
-        // const host = process.env.REDIS_HOST ?? '127.0.0.1';
-        // KOON CHANGED FOR DEPLOYING ON RAILWAY (NEEDS PWD) AND LOCALLY
         const redisUrl =
           process.env.REDIS_URL ||
           (process.env.REDIS_HOST
@@ -44,11 +42,6 @@ import { createKeyv } from '@keyv/redis';
   controllers: [AppController],
   providers: [
     AppService,
-    // NO NEED BECAUSE ERROR
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
   ],
 })
 export class AppModule { }
