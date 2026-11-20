@@ -6,8 +6,6 @@ jest.mock('../auth/guards/jwt-auth.guard', () => ({
   JwtAuthGuard: class MockJwtAuthGuard {},
 }));
 
-
-
 describe('RoomImageController', () => {
   let controller: RoomImageController;
 

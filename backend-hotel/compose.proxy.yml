@@ -9,7 +9,9 @@ services:
     volumes:
       - npm_data:/data
       - npm_certs:/etc/letsencrypt
-# app and npm share this project's default network; proxy target is app:3000.
+
 volumes:
   npm_data:
   npm_certs:
+
+# THIS IS UNUSED

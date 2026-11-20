@@ -12,7 +12,6 @@ jest.mock('../auth/guards/role-auth.guard', () => ({
   RolesGuard: class MockRolesGuard {},
 }));
 
-
 describe('BookingController', () => {
   let controller: BookingController;
 

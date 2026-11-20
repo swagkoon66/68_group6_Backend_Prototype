@@ -3,24 +3,20 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
-// import { afterEach, beforeEach, describe, it } from 'node:test';
 import { PrismaService } from './../src/prisma/prisma.service';
 
 describe('Hotel API (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
 
-  // Normal authentication test account
   const testEmail = `e2e-registration@example.com`;
   const testPassword = 'TestPassword123!';
   const testName = 'E2E Test User';
 
-  // Admin test account
   const adminTestEmail = `e2e-admin@example.com`;
   const adminTestPassword = 'AdminPassword123!';
   const adminTestName = 'E2E Admin User';
 
-  // Normal USER account
   const roomUserEmail = `e2e-room-user@example.com`;
   const roomUserPassword = 'RoomUserPassword123!';
   const roomUserName = 'E2E Room User';
@@ -50,7 +46,6 @@ describe('Hotel API (e2e)', () => {
 
     prisma = app.get<PrismaService>(PrismaService);
 
-    // Clean up only accounts belonging to this test suite.
     await prisma.user.deleteMany({
       where: {
         email: {
@@ -59,7 +54,6 @@ describe('Hotel API (e2e)', () => {
       },
     });
 
-    // Register Admin account.
     await request(app.getHttpServer())
       .post('/auth/register')
       .send({
@@ -69,13 +63,11 @@ describe('Hotel API (e2e)', () => {
       })
       .expect(201);
 
-    // Promote only this test account to ADMIN.
     await prisma.user.update({
       where: { email: adminTestEmail },
       data: { role: 'ADMIN' },
     });
 
-    // Login as Admin.
     const adminLogin = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
@@ -86,7 +78,6 @@ describe('Hotel API (e2e)', () => {
 
     adminToken = adminLogin.text;
 
-    // Register a separate normal USER account.
     await request(app.getHttpServer())
       .post('/auth/register')
       .send({
@@ -98,7 +89,6 @@ describe('Hotel API (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Delete notifications associated with test bookings first.
     if (createdBookingIds.length > 0) {
       await prisma.notification.deleteMany({
         where: {
@@ -106,7 +96,6 @@ describe('Hotel API (e2e)', () => {
         },
       });
 
-      // Delete only bookings created by this test suite.
       await prisma.booking.deleteMany({
         where: {
           id: { in: createdBookingIds },
@@ -114,7 +103,6 @@ describe('Hotel API (e2e)', () => {
       });
     }
 
-    // Delete only rooms created by this test suite.
     if (createdRoomIds.length > 0) {
       await prisma.room.deleteMany({
         where: {
@@ -123,7 +111,6 @@ describe('Hotel API (e2e)', () => {
       });
     }
 
-    // Delete only dedicated test accounts.
     await prisma.user.deleteMany({
       where: {
         email: {
@@ -198,10 +185,8 @@ describe('Hotel API (e2e)', () => {
 
       expect(response.body.id).toBeDefined();
 
-      // Track the room for cleanup.
       createdRoomIds.push(response.body.id);
 
-      // Verify the room was saved in the database.
       const savedRoom = await prisma.room.findUnique({
         where: { id: response.body.id },
       });
@@ -248,7 +233,6 @@ describe('Hotel API (e2e)', () => {
     const checkOut = '2027-01-15T00:00:00.000Z';
 
     beforeAll(async () => {
-      // Login as the normal USER.
       const userLogin = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
@@ -259,7 +243,6 @@ describe('Hotel API (e2e)', () => {
 
       bookingUserToken = userLogin.text;
 
-      // Create a dedicated room for booking tests.
       const roomResponse = await request(app.getHttpServer())
         .post('/room')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -288,7 +271,6 @@ describe('Hotel API (e2e)', () => {
         })
         .expect(201);
 
-      // Track the booking immediately for cleanup.
       bookingId = response.body.id;
 
       expect(bookingId).toBeDefined();
@@ -304,7 +286,6 @@ describe('Hotel API (e2e)', () => {
 
       expect(response.body.user_id).toBeDefined();
 
-      // Verify the booking was saved in the database.
       const savedBooking = await prisma.booking.findUnique({
         where: { id: bookingId },
       });
@@ -329,7 +310,6 @@ describe('Hotel API (e2e)', () => {
         })
         .expect(400);
 
-      // Confirm the original booking still exists.
       const existingBooking = await prisma.booking.findUnique({
         where: { id: bookingId },
       });
@@ -352,7 +332,6 @@ describe('Hotel API (e2e)', () => {
         status: 'CANCELLED',
       });
 
-      // Verify the cancelled status in the database.
       const cancelledBooking = await prisma.booking.findUnique({
         where: { id: bookingId },
       });
@@ -360,7 +339,6 @@ describe('Hotel API (e2e)', () => {
       expect(cancelledBooking).not.toBeNull();
       expect(cancelledBooking?.status).toBe('CANCELLED');
 
-      // Verify the update notification was created.
       const notifications = await prisma.notification.findMany({
         where: {
           booking_id: bookingId,
@@ -399,7 +377,6 @@ describe('Hotel API (e2e)', () => {
         'password_hash',
       );
 
-      // Verify the actual database record.
       const savedUser = await prisma.user.findUnique({
         where: { email: testEmail },
       });
@@ -463,7 +440,6 @@ describe('Hotel API (e2e)', () => {
 
       loginToken = response.text;
 
-      // Verify the refresh-token record was saved.
       const savedUser = await prisma.user.findUnique({
         where: { email: testEmail },
       });
@@ -562,7 +538,6 @@ describe('Hotel API (e2e)', () => {
 
       const oldToken = loginResponse.text;
 
-      // Wait so the newly signed JWT has a different issued-at time.
       await new Promise((resolve) => setTimeout(resolve, 1100));
 
       const refreshResponse = await request(app.getHttpServer())
@@ -580,7 +555,6 @@ describe('Hotel API (e2e)', () => {
       expect(newToken.length).toBeGreaterThan(0);
       expect(newToken).not.toBe(oldToken);
 
-      // Verify the old token was replaced.
       const oldTokenRecord =
         await prisma.refresh_token.findUnique({
           where: { token_hash: oldToken },
@@ -588,7 +562,6 @@ describe('Hotel API (e2e)', () => {
 
       expect(oldTokenRecord).toBeNull();
 
-      // Verify the new token exists.
       const newTokenRecord =
         await prisma.refresh_token.findUnique({
           where: { token_hash: newToken },

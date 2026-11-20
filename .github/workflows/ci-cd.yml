@@ -32,12 +32,12 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
         env:
-          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/Gr06Hotel
+          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/HOTEL-DATABASE
 
       - name: Run unit tests
         run: npm run test
         env:
-          DATABASE_URL: mysql://test:test@127.0.0.1:3306/test_db
+          DATABASE_URL: mysql://test:test@127.0.0.1:3306/HOTEL-DATABASE
 
       - name: Build application
         run: npm run build
@@ -45,7 +45,7 @@ jobs:
       - name: Validate Compose configuration
         run: |
           cp docker.example.env docker.env
-          sed -i 's/^MYSQL_DATABASE=.*/MYSQL_DATABASE=Gr06Hotel/' docker.env
+          sed -i 's/^MYSQL_DATABASE=.*/MYSQL_DATABASE=HOTEL-DATABASE/' docker.env
           docker compose --env-file docker.env \
             -f compose.yml -f compose.local.yml config --quiet
 
@@ -72,12 +72,12 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
         env:
-          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/Gr06Hotel
+          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/HOTEL-DATABASE
 
       - name: Configure test database
         run: |
           cp docker.example.env docker.env
-          sed -i 's/^MYSQL_DATABASE=.*/MYSQL_DATABASE=Gr06Hotel/' docker.env
+          sed -i 's/^MYSQL_DATABASE=.*/MYSQL_DATABASE=HOTEL-DATABASE/' docker.env
 
           # Expose MySQL to the runner so Jest can connect to it.
           cat > compose.ci.yml <<'EOF'
@@ -96,7 +96,7 @@ jobs:
         run: npm run test:e2e
         env:
           NODE_ENV: test
-          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/Gr06Hotel?allowPublicKeyRetrieval=true
+          DATABASE_URL: mysql://name:pass@127.0.0.1:3306/HOTEL-DATABASE?allowPublicKeyRetrieval=true
           JWT_SECRET: ci-test-secret
           SALT_ROUND: "12"
 

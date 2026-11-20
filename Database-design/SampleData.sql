@@ -1,4 +1,4 @@
-USE `Gr06Hotel`;
+USE `HOTEL-DATABASE`;
 
 -- =========================================================
 -- 1. USERS
@@ -73,7 +73,7 @@ VALUES
 
 (8,
  'Admin Hotel',
- 'admin@gr06hotel.example.com',
+ 'admin@hotel.example.com',
  '$2b$12$.jrlk7vN1jviwONYnemCROBV0.ROUeBi0vRQMcMBkS04pUxVA1OGG',
  'ADMIN',
  TRUE,

@@ -11,8 +11,6 @@ import { NotificationService } from '../notification/notification.service';
 describe('BookingService', () => {
   let service: BookingService;
 
-  
-
   const mockPrismaService = {
   booking: {
     create: jest.fn(),

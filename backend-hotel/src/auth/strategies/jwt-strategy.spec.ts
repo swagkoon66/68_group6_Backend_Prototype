@@ -1,4 +1,3 @@
-
 jest.mock('@nestjs/passport', () => ({
   PassportStrategy: () => {
     return class MockPassportStrategy {

@@ -113,7 +113,6 @@ export class AuthService {
 
       const newToken = this.jwtService.sign(payload);
 
-    
       await this.refreshTokenService.update(storedToken.id, {
           tokenHash: newToken,
           expiresAt: new Date(Date.now() + 60 * 60 * 1000),

@@ -32,7 +32,7 @@ export class RefreshTokenService {
         data: {
           user_id: userId,
           token_hash: token,
-          expires_at: new Date(Date.now() + 60 * 60 * 1000), // 60 minutes
+          expires_at: new Date(Date.now() + 60 * 60 * 1000),
           revoked_at: null,
         }
       });

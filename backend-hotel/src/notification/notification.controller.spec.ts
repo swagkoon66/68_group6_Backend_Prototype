@@ -6,7 +6,6 @@ jest.mock('../auth/guards/jwt-auth.guard', () => ({
   JwtAuthGuard: class MockJwtAuthGuard {},
 }));
 
-
 describe('NotificationController', () => {
   let controller: NotificationController;
 
