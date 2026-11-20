@@ -12,7 +12,6 @@ import { user_role } from '@prisma/client';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @Roles(user_role.USER)
   @Roles(user_role.ADMIN)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -23,6 +22,10 @@ export class UserController {
   @Get()
   findAll() {
     return this.userService.findAll();
+  }
+   @Get('admin-info')
+  fetchAdminInfo() {
+    return this.userService.findOne(/*lets say that the first user is an admin*/ 1);
   }
 
   @Roles(user_role.ADMIN)
@@ -43,8 +46,4 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  @Get('admin-info')
-  fetchAdminInfo() {
-    return this.userService.findOne(/*lets say that the first user is an admin*/ 1);
-  }
 }

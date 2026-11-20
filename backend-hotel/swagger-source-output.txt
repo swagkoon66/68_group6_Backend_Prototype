@@ -1,0 +1,1057 @@
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\app.controller.ts ==========
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) { }
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+
+  @Get("health")
+  getHealth(): any {
+    return this.appService.getHealth();
+  }
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\auth\auth.controller.ts ==========
+import { RefreshAuthDto } from './dto/refresh-auth.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { HttpCode, HttpStatus } from '@nestjs/common';
+import { LoginAuthDto } from './dto/login-auth.dto';
+import { RegisterAuthDto } from './dto/register-auth.dto';
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) { }
+
+  @Post('register')
+  register(@Body() registerDto: RegisterAuthDto) {
+    return this.authService.register(registerDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  login(@Body() loginDto: LoginAuthDto) {
+    return this.authService.login(loginDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  logout(@Body() tokenObj: { token: string }) {
+    return this.authService.logout(tokenObj);
+  }
+
+  
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  refresh(@Body() refreshDto: RefreshAuthDto) {
+    return this.authService.refresh(refreshDto);
+  }
+
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\auth\dto\login-auth.dto.ts ==========
+
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+
+export class LoginAuthDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password!: string;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\auth\dto\refresh-auth.dto.ts ==========
+
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { LoginAuthDto } from './login-auth.dto';
+
+export class RefreshAuthDto extends LoginAuthDto {
+  @IsString()
+  @IsNotEmpty()
+  token!: string;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\auth\dto\register-auth.dto.ts ==========
+
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+
+export class RegisterAuthDto {
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsEmail()
+  email!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password!: string;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\booking\booking.controller.ts ==========
+
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Headers,
+} from '@nestjs/common';
+
+import { BookingService } from './booking.service';
+import { CreateBookingDto } from './dto/create-booking.dto';
+import { UpdateBookingDto } from './dto/update-booking.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/role-auth.guard';
+import { Roles } from '../auth/roles/roles.decorator';
+import { user_role } from '@prisma/client';
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('booking')
+export class BookingController {
+  constructor(private readonly bookingService: BookingService) {}
+
+  // ADMIN: Create a booking
+  @Post('admin')
+  @Roles(user_role.ADMIN)
+  create(@Body() createBookingDto: CreateBookingDto) {
+    return this.bookingService.create(createBookingDto);
+  }
+
+  // USER: Create a booking
+  @Post()
+  @Roles(user_role.USER)
+  createForUser(
+    @Headers('authorization') authorization: string,
+    @Body() createBookingDto: CreateBookingDto,
+  ) {
+    const token = authorization?.replace(/^Bearer\s+/i, '');
+
+    return this.bookingService.createForUser(
+      { token },
+      createBookingDto,
+    );
+  }
+
+  // ADMIN: Get all bookings
+  @Get()
+  @Roles(user_role.ADMIN)
+  findAll() {
+    return this.bookingService.findAll();
+  }
+
+  // USER: Get their own bookings
+  @Get('my')
+  @Roles(user_role.USER)
+  findAllForUser(
+    @Headers('authorization') authorization: string,
+  ) {
+    const token = authorization?.replace(/^Bearer\s+/i, '');
+
+    return this.bookingService.findAllForUser({ token });
+  }
+
+  // ADMIN: Get one booking
+  @Get(':id')
+  @Roles(user_role.ADMIN)
+  findOne(@Param('id') id: string) {
+    return this.bookingService.findOne(+id);
+  }
+
+  // ADMIN: Update a booking
+  @Patch(':id')
+  @Roles(user_role.ADMIN)
+  update(
+    @Param('id') id: string,
+    @Body() updateBookingDto: UpdateBookingDto,
+  ) {
+    return this.bookingService.update(+id, updateBookingDto);
+  }
+
+  // ADMIN: Delete a booking
+  @Delete(':id')
+  @Roles(user_role.ADMIN)
+  remove(@Param('id') id: string) {
+    return this.bookingService.remove(+id);
+  }
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\booking\dto\create-booking.dto.ts ==========
+
+import { booking_status } from '@prisma/client';
+import {
+  IsNumber,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  IsEnum,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CreateNotificationDto } from '../../notification/dto/create-notification.dto';
+
+export class CreateBookingDto {
+  @ApiPropertyOptional({
+    description: 'User ID associated with the booking (Admin only)',
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  userId?: number;
+
+  @ApiProperty({
+    description: 'Room ID associated with the booking',
+    example: 101,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  roomId!: number;
+
+  @ApiProperty({
+    description: 'Check-in date',
+    example: '2026-12-01T14:00:00Z',
+  })
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  checkIn!: Date;
+
+  @ApiProperty({
+    description: 'Check-out date',
+    example: '2026-12-05T11:00:00Z',
+  })
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  checkOut!: Date;
+
+  @ApiProperty({
+    description: 'Number of guests',
+    example: 2,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  guest!: number;
+
+  @ApiPropertyOptional({
+    description: 'Booking status (defaults to PENDING)',
+    enum: booking_status,
+    example: booking_status.PENDING,
+  })
+  @IsOptional()
+  @IsEnum(booking_status)
+  status?: booking_status;
+
+  @ApiPropertyOptional({
+    description: 'Optional notification details',
+    type: CreateNotificationDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateNotificationDto)
+  notification?: CreateNotificationDto;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\booking\dto\create-nested-booking.dto.ts ==========
+import { booking_status } from '@prisma/client';
+import {
+  IsNumber,
+  IsOptional,
+  IsDate,
+  IsEnum,
+  IsNotEmpty,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreateNestedBookingDto {
+  @IsOptional()
+  @IsNumber()
+  userId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  roomId?: number;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  checkIn!: Date;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  checkOut!: Date;
+
+  @IsNumber()
+  @IsNotEmpty()
+  guest!: number;
+
+  @IsEnum(booking_status)
+  @IsNotEmpty()
+  status!: booking_status;
+
+  @IsNumber()
+  @IsNotEmpty()
+  pricePerNight!: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  totalAmount!: number;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  createdAt!: Date;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  updatedAt!: Date;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\booking\dto\update-booking.dto.ts ==========
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateNestedBookingDto } from "../../booking/dto/create-nested-booking.dto";
+
+export class UpdateBookingDto extends PartialType(CreateNestedBookingDto) {
+    booking?: CreateNestedBookingDto[];
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\notification\notification.controller.ts ==========
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { NotificationService } from './notification.service';
+import { CreateNotificationDto } from './dto/create-notification.dto';
+import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { RolesGuard } from '../auth/guards/role-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Roles } from '../auth/roles/roles.decorator';
+import { user_role } from '@prisma/client';
+
+@UseGuards(RolesGuard, JwtAuthGuard)
+@Roles(user_role.ADMIN)
+@Controller('notification')
+export class NotificationController {
+  constructor(private readonly notificationService: NotificationService) { }
+
+  @Post()
+  create(@Body() createNotificationDto: CreateNotificationDto) {
+    return this.notificationService.create(createNotificationDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.notificationService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.notificationService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
+    return this.notificationService.update(+id, updateNotificationDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.notificationService.remove(+id);
+  }
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\notification\dto\create-notification.dto.ts ==========
+import { notification_type } from "@prisma/client";
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+export class CreateNotificationDto {
+
+    @ApiProperty({ description: 'Admin ID associated with the notification', example: 1 })
+    @IsNumber()
+    @IsNotEmpty()
+    userId!: number;
+
+    @ApiProperty({ description: 'Booking ID associated with the booking', example: 1 })
+    @IsNumber()
+    @IsNotEmpty()
+    bookingId!: number;
+
+    @ApiProperty({ description: 'Type of the notification', example: 'BOOKING_CONFIRMED' })
+    @IsNotEmpty()
+    type!: notification_type;
+
+    @ApiProperty({ description: 'Message of the notification', example: 'Your booking has been confirmed.' })
+    @IsString()
+    @IsNotEmpty()
+    message!: string;
+
+    @ApiProperty({ description: 'Indicates if the notification has been read', example: false })
+    @IsBoolean()
+    @IsNotEmpty()
+    isRead!: boolean;
+
+    @ApiProperty({ description: 'Creation date of the notification', example: '2024-07-01T14:00:00Z' })
+    @IsDate()
+    @IsNotEmpty()
+    createdAt!: Date;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\notification\dto\update-notification.dto.ts ==========
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateNotificationDto } from './create-notification.dto';
+
+export class UpdateNotificationDto extends PartialType(CreateNotificationDto) {}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\refresh-token\refresh-token.controller.ts ==========
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { RefreshTokenService } from './refresh-token.service';
+import { CreateRefreshTokenDto } from './dto/create-refresh-token.dto';
+import { UpdateRefreshTokenDto } from './dto/update-refresh-token.dto';
+import { RolesGuard } from '../auth/guards/role-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { user_role } from '@prisma/client';
+import { Roles } from '../auth/roles/roles.decorator';
+
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('refresh-token')
+export class RefreshTokenController {
+  constructor(private readonly refreshTokenService: RefreshTokenService) { }
+
+  @Post()
+  @Roles(user_role.ADMIN)
+  create(@Body() createRefreshTokenDto: CreateRefreshTokenDto) {
+    return this.refreshTokenService.create(createRefreshTokenDto);
+  }
+
+  @Get()
+  @Roles(user_role.ADMIN)
+  findAll() {
+    return this.refreshTokenService.findAll();
+  }
+
+  @Get(':id')
+  @Roles(user_role.ADMIN)
+  findOne(@Param('id') id: string) {
+    return this.refreshTokenService.findOne(+id);
+  }
+
+  @Patch(':id')
+  @Roles(user_role.ADMIN)
+  update(@Param('id') id: string, @Body() updateRefreshTokenDto: UpdateRefreshTokenDto) {
+    return this.refreshTokenService.update(+id, updateRefreshTokenDto);
+  }
+
+  @Delete(':id')
+  @Roles(user_role.ADMIN)
+  remove(@Param('id') id: string) {
+    return this.refreshTokenService.remove(+id);
+  }
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\refresh-token\dto\create-refresh-token.dto.ts ==========
+
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsDate,
+} from 'class-validator';
+
+export class CreateRefreshTokenDto {
+  @IsOptional()
+  @IsNumber()
+  userId?: number;
+
+  @IsString()
+  @IsNotEmpty()
+  tokenHash!: string;
+
+  @IsDate()
+  @IsNotEmpty()
+  expiresAt!: Date;
+
+  @IsOptional()
+  @IsDate()
+  revokedAt?: Date;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\refresh-token\dto\update-refresh-token.dto.ts ==========
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateRefreshTokenDto } from './create-refresh-token.dto';
+
+export class UpdateRefreshTokenDto extends PartialType(CreateRefreshTokenDto) {}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\room\room.controller.ts ==========
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
+import { user_role } from '@prisma/client';
+
+import { RoomService } from './room.service';
+import { CreateRoomDto } from './dto/create-room.dto';
+import { UpdateRoomDto } from './dto/update-room.dto';
+import { SearchRoomParamDto } from './dto/search-room-param.dto';
+import { RoomResponseDto } from './dto/room-response.dto';
+
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/role-auth.guard';
+import { Public, Roles } from '../auth/roles/roles.decorator';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+
+@ApiTags('room')
+@Controller('room')
+export class RoomController {
+  constructor(private readonly roomService: RoomService) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Create a new room (Admin only)' })
+  @ApiBody({ type: CreateRoomDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Room created successfully',
+    type: RoomResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid room data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  create(@Body() createRoomDto: CreateRoomDto) {
+    return this.roomService.create(createRoomDto);
+  }
+
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(30000) //30 second
+  @Get()
+  @Public()
+  @ApiOperation({ summary: 'Get all rooms' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of rooms',
+    type: [RoomResponseDto],
+  })
+  findAll() {
+    return this.roomService.findAll();
+  }
+
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(30000) //30s econd
+  @Get(':id')
+  @Public()
+  @ApiOperation({ summary: 'Get a room by ID' })
+  @ApiParam({ name: 'id', description: 'Room ID', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Room details',
+    type: RoomResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Room not found' })
+  findOne(@Param('id') id: number) {
+    return this.roomService.findARoom(+id);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update a room (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Room ID', type: Number })
+  @ApiBody({ type: UpdateRoomDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Room updated successfully',
+    type: RoomResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  @ApiResponse({ status: 404, description: 'Room not found' })
+  update(
+    @Param('id') id: string,
+    @Body() updateRoomDto: UpdateRoomDto,
+  ) {
+    return this.roomService.update(+id, updateRoomDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Delete a room (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Room ID', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Room deleted successfully',
+    type: RoomResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  @ApiResponse({ status: 404, description: 'Room not found' })
+  remove(@Param('id') id: string) {
+    return this.roomService.remove(+id);
+  }
+
+  @Patch(':id/enable')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Enable a room (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Room ID', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Room enabled successfully',
+    type: RoomResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  @ApiResponse({ status: 404, description: 'Room not found' })
+  enable(@Param('id') id: number) {
+    return this.roomService.enable(id);
+  }
+
+  @Patch(':id/disable')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Disable a room (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Room ID', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Room disabled successfully',
+    type: RoomResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  @ApiResponse({ status: 404, description: 'Room not found' })
+  disable(@Param('id') id: number) {
+    return this.roomService.disable(id);
+  }
+
+  @Post('search')
+  @Public()
+  @ApiOperation({ summary: 'Search rooms using optional criteria' })
+  @ApiBody({ type: SearchRoomParamDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Matching rooms. An empty array means no rooms matched.',
+    type: [RoomResponseDto],
+  })
+  search(@Body() searchParamDto: SearchRoomParamDto) {
+    return this.roomService.findAllRoomThat(searchParamDto);
+  }
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\room\dto\create-room.dto.ts ==========
+
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  IsNumber,
+  ValidateNested,
+  Min,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+} from '@nestjs/swagger';
+
+import { CreateRoomImageDto } from '../../room-image/dto/create-room-image.dto';
+import { CreateNestedBookingDto } from '../../booking/dto/create-nested-booking.dto';
+
+export class CreateRoomDto {
+  @ApiProperty({
+    description: 'Name of the room',
+    example: 'Deluxe Suite',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @ApiPropertyOptional({
+    description: 'Description of the room',
+    example: 'A spacious suite with a king-size bed.',
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiProperty({
+    description: 'Maximum guest capacity',
+    example: 2,
+    minimum: 1,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @IsNotEmpty()
+  capacity!: number;
+
+  @ApiProperty({
+    description: 'Price per night',
+    example: 150.00,
+    minimum: 0,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @IsNotEmpty()
+  pricePerNight!: number;
+
+  @ApiPropertyOptional({
+    description: 'Whether the room is active',
+    example: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Bookings associated with the room',
+    type: [CreateNestedBookingDto],
+  })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CreateNestedBookingDto)
+  booking?: CreateNestedBookingDto[];
+
+  @ApiPropertyOptional({
+    description: 'Images associated with the room',
+    type: [CreateRoomImageDto],
+  })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CreateRoomImageDto)
+  roomImage?: CreateRoomImageDto[];
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\room\dto\room-response.dto.ts ==========
+
+import { ApiProperty } from '@nestjs/swagger';
+
+export class RoomResponseDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Unique room ID',
+  })
+  id!: number;
+
+  @ApiProperty({
+    example: 'Deluxe Suite',
+    description: 'Name of the room',
+  })
+  name!: string;
+
+  @ApiProperty({
+    example: 'A spacious suite with a king-size bed.',
+    nullable: true,
+    description: 'Description of the room',
+  })
+  description!: string | null;
+
+  @ApiProperty({
+    example: 2,
+    description: 'Maximum guest capacity',
+  })
+  capacity!: number;
+
+  @ApiProperty({
+    example: '150.00',
+    description: 'Price per night. Prisma Decimal is serialized as a string.',
+  })
+  price_per_night!: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'Whether the room is active',
+  })
+  is_active!: boolean;
+
+  @ApiProperty({
+    example: '2026-11-19T10:00:00.000Z',
+    format: 'date-time',
+    description: 'Room creation timestamp',
+  })
+  created_at!: Date;
+
+  @ApiProperty({
+    example: '2026-11-19T10:00:00.000Z',
+    format: 'date-time',
+    description: 'Last update timestamp',
+  })
+  updated_at!: Date;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\room\dto\search-room-param.dto.ts ==========
+
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsNumber,
+  IsDate,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+
+export class SearchRoomParamDto {
+  @ApiPropertyOptional({
+    example: 'Deluxe',
+    description: 'Search rooms by name',
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @ApiPropertyOptional({
+    example: 2,
+    description: 'Filter by room capacity',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  capacity?: number;
+
+  @ApiPropertyOptional({
+    example: 150,
+    description: 'Filter by price per night',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  pricePerNight?: number;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter by active status',
+  })
+  @Type(() => Boolean)
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
+
+  @ApiPropertyOptional({
+    example: '2026-12-01T00:00:00.000Z',
+    description: 'Booking search start date',
+  })
+  @Type(() => Date)
+  @IsDate()
+  @IsOptional()
+  startDate?: Date;
+
+  @ApiPropertyOptional({
+    example: '2026-12-05T00:00:00.000Z',
+    description: 'Booking search end date',
+  })
+  @Type(() => Date)
+  @IsDate()
+  @IsOptional()
+  endDate?: Date;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\room\dto\update-room.dto.ts ==========
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateRoomDto } from './create-room.dto';
+
+export class UpdateRoomDto extends PartialType(CreateRoomDto) {}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\room-image\room-image.controller.ts ==========
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { RoomImageService } from './room-image.service';
+import { CreateRoomImageDto } from './dto/create-room-image.dto';
+import { UpdateRoomImageDto } from './dto/update-room-image.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/role-auth.guard';
+import { Roles } from '../auth/roles/roles.decorator';
+import { user_role } from '@prisma/client';
+
+@UseGuards(RolesGuard, JwtAuthGuard)
+@Roles(user_role.ADMIN)
+@Controller('room-image')
+export class RoomImageController {
+  constructor(private readonly roomImageService: RoomImageService) { }
+
+  @Post()
+  create(@Body() createRoomImageDto: CreateRoomImageDto) {
+    return this.roomImageService.create(createRoomImageDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.roomImageService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.roomImageService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateRoomImageDto: UpdateRoomImageDto) {
+    return this.roomImageService.update(+id, updateRoomImageDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.roomImageService.remove(+id);
+  }
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\room-image\dto\create-room-image.dto.ts ==========
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
+export class CreateRoomImageDto {
+    @IsNumber()
+    @IsNotEmpty()
+    roomId!: number;
+    @IsString()
+    @IsNotEmpty()
+    url!: string;
+    @IsString()
+    @IsOptional()
+    storageKey?: string;
+    @IsString()
+    @IsOptional()
+    mimeType?: string;
+    @IsNumber()
+    @IsOptional()
+    fileSize?: number;
+    @IsBoolean()
+    @IsNotEmpty()
+    isPrimary!: boolean;
+    @IsDate()
+    @IsNotEmpty()
+    createdAt!: Date;
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\room-image\dto\update-room-image.dto.ts ==========
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateRoomImageDto } from './create-room-image.dto';
+
+export class UpdateRoomImageDto extends PartialType(CreateRoomImageDto) {}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\user\user.controller.ts ==========
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/role-auth.guard';
+import { Roles } from '../auth/roles/roles.decorator';
+import { user_role } from '@prisma/client';
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('user')
+export class UserController {
+  constructor(private readonly userService: UserService) { }
+
+  @Roles(user_role.USER)
+  @Roles(user_role.ADMIN)
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
+  }
+
+  @Roles(user_role.ADMIN)
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
+  @Roles(user_role.ADMIN)
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(+id);
+  }
+
+  @Roles(user_role.ADMIN)
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(+id, updateUserDto);
+  }
+
+  @Roles(user_role.ADMIN)
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.userService.remove(+id);
+  }
+
+  @Get('admin-info')
+  fetchAdminInfo() {
+    return this.userService.findOne(/*lets say that the first user is an admin*/ 1);
+  }
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\user\dto\create-user.dto.ts ==========
+import { user_role } from "@prisma/client";
+import { CreateNestedBookingDto } from "../../booking/dto/create-nested-booking.dto";
+import { CreateNotificationDto } from "../../notification/dto/create-notification.dto";
+import { CreateRefreshTokenDto } from "../../refresh-token/dto/create-refresh-token.dto";
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber, IsDate, MaxLength, IsDecimal } from "class-validator";
+export class CreateUserDto {
+    @IsString()
+    @IsNotEmpty()
+    name!: string;
+    @IsString()
+    @IsNotEmpty()
+    email!: string;
+    @IsString()
+    @IsNotEmpty()
+    passwordHash!: string;
+    @IsNotEmpty()
+    role!: user_role;
+    @IsNotEmpty()
+    isActive!: boolean | true;
+    @IsDate()
+    @IsNotEmpty()
+    createdAt!: Date;
+    @IsDate()
+    @IsNotEmpty()
+    updatedAt!: Date;
+    @IsOptional()
+    booking?: CreateNestedBookingDto[];
+    @IsOptional()
+    notification?: CreateNotificationDto[];
+    @IsOptional()
+    refreshToken?: CreateRefreshTokenDto[];
+}
+
+========== D:\Bamm\ICT Work\Backend\Project\68_group6_Backend_Prototype\backend-hotel\src\user\dto\update-user.dto.ts ==========
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateUserDto } from './create-user.dto';
+
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
