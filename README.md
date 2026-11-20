@@ -24,7 +24,7 @@ The backend provides authentication, room management, booking management, user m
 This project can be opened 
 1. "locally" (```npm run ...```) 
 2. by using Docker (```docker compose ...```)
-3. on our <a href="https://68group6backendprototype-production.up.railway.app">Railway </a>
+3. on our <a href="68groupxbackend-railway-production.up.railway.app">Railway </a>
 
 ### 2.1 "Locally Run" and "Docker" Prerequisites
 
